@@ -1,0 +1,245 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+        <i class="cu-card__line"></i>
+        <span class="">我的工具</span>
+    </div>
+  </div>
+  <div class="mt-2">
+    <ul class="rxadmin-contentnav clearfix pb-1" id="toolNav">
+        <li><a data-type="1" class="active" href="javascript:">工作</a></li>
+        <li><a data-type="2" href="javascript:">课件</a></li>
+        <li><a data-type="3" href="javascript:">系统</a></li>
+        <li><a data-type="4" href="javascript:">工具</a></li>
+        <li><a data-type="5" href="javascript:">资料</a></li>
+    </ul>
+  </div>
+  <!-- 排行信息 -->
+  <div class="cu-card__main pt-0">
+    <div id="tool-render"></div>
+    <div class="tx-hidden" id="tool-data">
+      <div class="clearfix mt-2">
+        <span class="cLightGray pr-2 fl lh-38">资料搜索</span>
+        <div class="col-10"><input type="text" name="title" lay-verify="required" placeholder="请输入资料名称" class="layui-input"></div>
+        <button class="layui-btn layui-btn-sm layui-btn-normal ml-2 lh-20 mt-1">搜索</button>
+      </div>
+      <div id="tooldata-render"></div>
+    </div>
+  </div>
+</div>
+<script>
+  layui.use(['layer'], function(){
+    // 获取工具信息
+    getRankingInfo(1)
+    function getRankingInfo(type){
+        // 根据获取到的id获取城 国 司数据
+        var params = {
+          postId: 1,
+          type: type,
+          cardNo: getCookie('appCardNo')
+        }
+        $.ajax({
+            type: "get",
+            url: "https://tedu.rxjy.com/a/rx/rxToolAuthority/getToolListByPost",
+            data: params,
+            success : function(result) {
+                var getTpl = document.getElementById('tool-template').innerHTML;
+                var view = document.getElementById('tool-render');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    laytpl(getTpl).render(result, function(html){
+                      view.innerHTML = html;
+                    });
+                })
+            },
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+    };
+    // 获取工具
+    function gettoolInfo() {
+      // 工具List
+      var toolList = [
+          {
+            imgUrl: 'https://tapp.rxjy.com/common/head/gc_app.png',
+            name: '工程App',
+            content: '工程部员工使用的手机APP下载链接，复制后通过微信分享使用。',
+            link: 'https://pi.rxjy.com/Home/AppDownload?AppId=5',
+          }
+        ]
+      var getTpl = document.getElementById('toolinfo-template').innerHTML;
+      var view = document.getElementById('tool-render');
+      layui.use('laytpl', function(){
+          var laytpl = layui.laytpl;
+          laytpl(getTpl).render(toolList, function(html){
+            view.innerHTML = html;
+            // 实现复制的功能 
+            $('#linkCopyDom').click(function() {
+              var order_input = document.createElement('input');
+              order_input.value = $('#linkDom').text();
+              document.body.appendChild(order_input);
+              order_input.select();
+              document.execCommand("Copy");
+              layer.msg('链接复制成功');
+              order_input.style.display = 'none';
+            })
+          });
+      })
+    }
+    // 获取资料
+    function getdataInfo() {
+      // 资料List
+      var dataList = [
+          {
+            name: '客服中心投诉管理制度',
+            departName: '投资',
+            edition: 'v0',
+            time: '19-05-21'
+          },
+          {
+            name: ' 2020考核标准',
+            departName: '商务',
+            edition: 'v2',
+            time: '20-03-07'
+          }
+        ]
+      var getTpl = document.getElementById('tooldata-template').innerHTML;
+      var view = document.getElementById('tooldata-render');
+      layui.use('laytpl', function(){
+          var laytpl = layui.laytpl;
+          laytpl(getTpl).render(dataList, function(html){
+            view.innerHTML = html;
+          });
+      })
+    }
+    // 切换
+    $("#toolNav a").click(function(){
+        if (parseInt($(this).attr("data-type")) < 4) {
+          $('#tool-render').show()
+          $('#tool-data').hide()
+          getRankingInfo(parseInt($(this).attr("data-type")));
+        } 
+        if (parseInt($(this).attr("data-type")) === 4) {
+          $('#tool-render').show()
+          $('#tool-data').hide()
+          gettoolInfo()
+        }
+        if (parseInt($(this).attr("data-type")) === 5) {
+          $('#tool-render').hide()
+          $('#tool-data').show()
+          getdataInfo()
+        }
+        $("#toolNav a").removeClass("active");
+        $(this).addClass("active");
+      });
+  });
+</script>
+<!-- 工具循环模板（工作  课件 系统） -->
+<script id="tool-template" type="text/html">
+  <ul class="plr-1 pb-1  relative">
+  {{#  layui.each(d.body, function(index, item){ }}
+    <li class="cu-panel mt-2">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-8">
+          <img width="150px" height="120px" src="{{item.pageImg}}">
+        </div>
+        <div class="cu-panel__split col-12">
+          <div class="col-24 tx-left">
+              <span class="cLightGray pr-1">名称</span>
+              <span>{{item.title}}</span>
+          </div>
+        </div>
+        <div class="cu-panel__split col-4">
+            <a href="{{item.fileUrl}}" target="_blank" class="cBlue fw-bold">[预览]</a>
+            <a href="{{item.uploadUrl}}" target="_blank" class="cBlue fw-bold">[下载]</a>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if( d.statusCode === 0 || d.body.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>
+<!-- 工具循环模板（工具） -->
+<script id="toolinfo-template" type="text/html">
+  <ul class="plr-1 pb-1  relative">
+  {{#  layui.each(d, function(index, item){ }}
+    <li class="cu-panel mt-2">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-8">
+          <img width="150px" height="120px" src="{{item.imgUrl}}">
+        </div>
+        <div class="cu-panel__split col-12">
+          <div class="col-24">
+            <p class="tx-left">
+              <span class="fz-16 fw-bold">{{item.name}}</span>
+            </p>
+          </div>
+          <div class="col-24">
+            <p class="tx-left">
+              <span class="cLightGray pr-1"></span>
+              <span>{{item.content}}</span>
+            </p>
+          </div>
+        </div>
+        <div class="cu-panel__split col-4">
+            <textarea id="linkDom" class="tx-hidden">{{item.link}}</textarea>
+            <span class="cBlue fw-bold pointer" id="linkCopyDom">[复制链接]</span>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if( d.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>
+<!-- 工具循环模板（资料） -->
+<script id="tooldata-template" type="text/html">
+  <ul class="plr-1 pb-1  relative">
+  {{#  layui.each(d, function(index, item){ }}
+    <li class="cu-panel mt-2">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-24">
+          <div class="col-8">
+            <p class="tx-left">
+              <span class="cLightGray pr-1">名称</span>
+              <span>{{item.name}}</span>
+            </p>
+          </div>
+          <div class="col-4">
+            <p class="tx-left">
+              <span class="cLightGray pr-1">部门</span>
+              <span>{{item.departName}}</span>
+            </p>
+          </div>
+          <div class="col-6">
+            <p class="tx-left">
+              <span class="cLightGray pr-1">版本</span>
+              <span>{{item.edition}}</span>
+            </p>
+          </div>
+          <div class="col-6">
+            <p class="tx-left">
+              <span class="cLightGray pr-1">更新</span>
+              <span>{{item.time}}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if( d.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>

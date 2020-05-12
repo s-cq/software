@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="shortcut icon" href="/pm.ico" />
+    <link rel="stylesheet" href=" https://3w.rxjy.com/statics/css/common.css">
+    <link rel="stylesheet" href="/css/rxadmin.css">
+    <!-- 页面单独样式 -->
+    <link rel="stylesheet" href="/css/myapp.css">
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/layui/2.5.6/css/layui.css">
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/stylesheets/rxcu.css">
+    <link rel="stylesheet" href="/css/rx">
+    
+    <script src="https://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/layui-src/dist/layui.js"></script>
+    <script>
+        var orderNo = getCookie('proorderNo');
+        var uid = getCookie('uid');
+    </script>
+</head>
+<body>
+    <%- include('components/header.ejs') %>
+    <div class="rxadmin-warp">
+        <div class="rx-content clearfix">
+            <div class="rxadmin-nav fl">
+                <a class="bor-solid-bottom cBlue ptb-2 fz-20 dis-block pointer fw-bold" href="/">项目</a>
+                <h3 class="fz-14 pa10 bor-solid-bottom" id="proName" style="height: 38px;"></h3>
+                <!-- <h2 class="nav-title">我的项目</h2> -->
+                <ul class="nav-list">
+                    <li><a href="/project/index">基础</a></li>
+                    <li><a href="/project/security">绘图</a></li>
+                    <li><a href="/project/subject">科目</a></li>
+                    <li><a href="/project/artificial">人工</a></li>
+                    <li><a href="/project/material">材料</a></li>
+                    <li><a href="/project/quality">质量</a></li>
+                    <li><a href="/project/scene">现场</a></li>
+                    <li><a href="/project/supervise">管理</a></li>
+                    <li><a href="/project/security">安全</a></li>
+                </ul>
+                <h2 class="nav-title">项目订单</h2>
+                <ul class="nav-list">
+                    <li><a href="/order?id=1999">全部</a></li>
+                    <li class="relative"><a href="/project/itemOrderAll?id=0">待办</a><span class="message-title">2</span></li>
+                    <li class="relative"><a href="/project/itemOrderAll?id=3">待收</a><span class="message-title">2</li>
+                    <li class="relative"><a href="/project/itemOrderAll?id=1">待验</a><span class="message-title">2</li>
+                    <li class="relative"><a href="/project/itemOrderAll?id=2">历史</a></li>
+                </ul>
+                <h2 class="nav-title">项目款项</h2>
+                <ul class="nav-list">
+                    <li><a href="">收款</a></li>
+                    <li><a href="">支款</a></li>
+                    <li><a href="">质保金</a></li>
+                </ul>
+                <h2 class="nav-title">项目资料</h2>
+                <ul class="nav-list">
+                    <li><a href="/test2">资料</a></li>
+                </ul>
+            </div>
+            <div class="rxadmin-content fr">
+                <div class="clearfix">
+                    <%-body%>
+                    <%- include('components/right.ejs') %>
+                </div>
+            </div>
+        </div>
+    </div>
+<style>
+    .server-nav-type a { display: block;}
+</style>
+<script>
+    $(function(){
+        $.ajax({
+            //请求方式
+            type : "get",
+            url : "https://gams.rxjy.com/a/ams/workorderClientInfo/getWorkOrderInfo",
+            data : {
+                'orderno':orderNo
+            },
+            success : function(result) {
+                document.title=result.workOrderInfo.proname;
+               $("#proName").html(ellipsisText(result.workOrderInfo.proname,12)).attr("title",result.workOrderInfo.proname)
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+    })
+</script>   
+<script type="text/javascript">
+    var urlstr = location.href;
+    var urlstatus=false;
+    $(".rxadmin-nav a").each(function () {
+        if ((urlstr + '/').indexOf($(this).attr('href')) > -1&&$(this).attr('href')!="") {
+            $(this).addClass('active'); urlstatus = true;
+        }
+        else {
+            $(this).removeClass('active');
+        }
+    });
+    if (!urlstatus) {$(".rxadmin-nav a").eq(0).addClass('active'); }
+</script>  
+</body>
+</html>

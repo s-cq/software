@@ -1,0 +1,119 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+      <i class="cu-card__line"></i>
+      <span class="">我的质保金</span>
+    </div>
+  </div>
+  <!-- 质保金信息 -->
+  <div class="cu-card__main plr-1">
+      <div  class="cu-panel">
+          <div class="cu-panel__main is-not-border tx-center lh-26  pa10">
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">合同额总计</span>
+                <span class="contractNoMoney"></span>
+              </p>
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">质保金总计</span>
+                <span class="qualityMoney cGreen"></span>
+              </p>
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">超期未收总计</span>
+                <span class="exceedMoney"></span>
+              </p>
+              <!-- <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">质保总计</span>
+                <span class="qualityNumber"></span>
+              </p> -->
+          </div>
+      </div>
+      <div id="quality-render"></div>
+  </div>
+</div>
+<!-- 获取数据 -->
+<script>
+  $(function(){
+    // 线上地址：[] https://gngrc.rxjy.com http://192.168.1.170:6601
+    // 获取该项目经理所有质保金信息
+    $.ajax({
+          url : "https://gxmrs.rxjy.com/a/money/pmUserInfoMoney/getPmUserinfoWarrantyGoldbyUid",
+          type : "GET",
+          data : {uid: uid},
+          success : function(result) {
+              var contractNoMoney = 0, qualityMoney = 0, exceedMoney = 0;
+              for(var i=0; i<result.Body.length; i++) {
+                contractNoMoney += Number(result.Body[i].contractFee)
+                qualityMoney += Number(result.Body[i].zbjExpire)
+                exceedMoney += Number(result.Body[i].zbjExpire-result.Body[i].zbjNotExpire)
+              }
+              $('.contractNoMoney').text(contractNoMoney+ '元')
+              $('.qualityMoney').text(qualityMoney+ '元')
+              $('.exceedMoney').text(exceedMoney+ '元')
+              $('.qualityNumber').text(result.Body.length+ '条')
+              if (exceedMoney > 0) {
+                $('.exceedMoney').addClass('cGreen')
+              } else {
+                $('.exceedMoney').addClass('cRed')
+              }
+              var getTpl = document.getElementById('quality-template').innerHTML;
+              var view = document.getElementById('quality-render');
+              layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(getTpl).render(result, function(html){
+                  view.innerHTML = html;
+                });
+              })
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+  })
+</script>
+<!-- 押金循环模板 -->
+<script id="quality-template" type="text/html">
+    <ul class="pb-1">
+    {{#  layui.each(d.Body, function(index, item){ }}
+        <li class="cu-panel mt-4">
+        <div class="cu-panel__title">
+            <p class="fl pr-8">
+                <span class="cLightGray pr-1">项目名称</span>
+                <span>{{item.proname}}</span>
+            </p>
+            <p class="fr">
+                <span class="cLightGray pr-1">合同号</span>
+                <span>{{item.contractNo}}</span>
+            </p>
+        </div>
+        <div class="cu-panel__main is-not-border tx-center lh-26">
+            <div class="cu-panel__split">
+            <div class="col-6 tx-left">
+                <span class="cLightGray pr-1">合同额</span>
+                <span>{{toFixed(item.contractFee,2)}}</span>
+            </div>
+            <div class="col-6 tx-left">
+                <span class="cLightGray pr-1">质保额</span>
+                <span>{{toFixed(item.zbjExpire,2)}}</span>
+            </div>
+            <div class="col-6 tx-left">
+                <span class="cLightGray pr-1">超期</span>
+                <span class="{{item.warrantyPeriod > 0 ? 'cGreen' : 'cRed'}}">{{item.warrantyPeriod}}天</span>
+            </div>
+            <div class="col-6 tx-left">
+                <span class="cLightGray pr-1">超期未收</span>
+                <span class="{{item.zbjExpire-item.zbjNotExpire > 0 ? 'cGreen' : 'cRed'}}">{{item.zbjExpire-item.zbjNotExpire}}</span>
+            </div>
+            </div>
+        </div>
+        </li>
+    {{#  }); }}
+    {{#  if(d.Body.length === 0){ }}
+        <div class="tx-center mt-4">
+            <img width="500" src="/images/nodata.jpg" alt="">
+        </div>
+    {{#  } }}
+    </ul>
+</script>
+

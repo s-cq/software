@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目经理个人中心</title>
+    <link rel="shortcut icon" href="/pm.ico" />
+
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/layui/2.5.6/css/layui.css">
+    <link rel="stylesheet" href=" https://3w.rxjy.com/statics/css/common.css">
+    <link rel="stylesheet" href="/css/rxadmin.css">
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/stylesheets/rxcu.css">
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/viewerjs/1.5.0/viewer.min.css">
+    <!-- 页面单独样式 -->
+    <link rel="stylesheet" href="/css/myapp.css">
+       
+    
+    <script src="https://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://lib.rxjy.com/ajax/libs/viewerjs/1.5.0/viewer.js"></script>
+    <script src="https://lib.rxjy.com/ajax/libs/jquery-viewer/1.0.1/jquery-viewer.min.js"></script>
+
+
+
+    <script src="/js/utils.js"></script>
+    <script src="/layui-src/dist/layui.js"></script>
+    <script>
+        var uid = getCookie('uid');
+    </script>
+</head>
+<body>
+<%- include('components/header.ejs') %>
+<div class="rxadmin-warp">
+    <div class="rx-content clearfix" id="rxAdmin">
+        <div class="rxadmin-content" style="width:1200px">
+            <div class="clearfix">
+                <%-body%>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/plupload-2.3.6.full.min.js"></script>
+<script src="/js/upload.js"></script>
+</body>
+</html>

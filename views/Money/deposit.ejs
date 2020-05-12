@@ -1,0 +1,121 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+      <i class="cu-card__line"></i>
+      <span class="">我的保证金</span>
+    </div>
+  </div>
+  <!-- 押金信息 -->
+  <div class="cu-card__main pa-2">
+      <div  class="cu-panel">
+          <div class="cu-panel__main is-not-border tx-center lh-26  pa10">
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">保证金</span>
+                <span class="depositMoney"></span>
+              </p>
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">已处理</span>
+                <span class="depositAleary cGreen"></span>
+              </p>
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">待处理</span>
+                <span class="depositNo cRed"></span>
+              </p>
+          </div>
+      </div>
+      <div id="deposit-render"></div>
+  </div>
+</div>
+<!-- 获取数据 -->
+<script>
+  $(function(){
+    // 线上地址：[] https://gngrc.rxjy.com http://192.168.1.170:6601
+    // 获取该项目经理所有押金信息
+    $.ajax({
+          url : "https://gxmrs.rxjy.com/a/money/pmUserInfoMoney/findPmUserInfoDepositByUid",
+          type : "GET",
+          data : {uid: uid},
+          success : function(result) {
+                var data = {Body: []}
+                if (result.Body) {
+                    data = result
+                    var depositMoney = 0, notNumber = 0, alreadyNumber = 0;
+                    for(var i=0; i<result.Body.length; i++) {
+                        depositMoney += Number(result.Body[i].money)
+                        if (Number(result.Body[i].depositState) === 0) {
+                            notNumber += 1
+                        }
+                        if (Number(result.Body[i].depositState) === 1) {
+                            alreadyNumber += 1
+                        }
+                    }
+                    $('.depositMoney').text(depositMoney+ '元')
+                    $('.depositAleary').text(alreadyNumber+ '个')
+                    $('.depositNo').text(notNumber+ '个')
+                }
+                var getTpl = document.getElementById('deposit-template').innerHTML;
+                var view = document.getElementById('deposit-render');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    laytpl(getTpl).render(data, function(html){
+                    view.innerHTML = html;
+                    });
+                })
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+  })
+</script>
+<!-- 押金循环模板 -->
+<script id="deposit-template" type="text/html">
+  <ul class="pb-1">
+  {{#  layui.each(d.Body, function(index, item){ }}
+        <li class="cu-panel mt-4">
+        <div class="cu-panel__title">
+            <p class="fl pr-8">
+                <span class="cLightGray pr-1">项目名称</span>
+                <span>{{item.proname}}</span>
+            </p>
+            <p class="fl pr-8">
+                <span class="cLightGray pr-1">项目单号</span>
+                <span>{{item.orderNo}}</span>
+            </p>
+            <p class="fr">
+                <span class="cLightGray ">时间</span>
+                <span>{{item.doTime}}</span>
+            </p>
+        </div>
+        <div class="cu-panel__main is-not-border tx-center lh-26">
+            <div class="cu-panel__split">
+            <div class="col-8 tx-left">
+                <span class="cLightGray pr-1">类型</span>
+                <span>{{item.depositType }}</span>
+            </div>
+            <div class="col-8 tx-left">
+                <span class="cLightGray pr-1">扣除</span>
+                <span>{{item.money}}</span>
+            </div>
+            <div class="col-8 tx-left">
+                <span class="cLightGray pr-1">状态</span>
+                <span class="{{item.depositState === 0 ? 'cRed' : 'cGreen'}}">{{item.depositState === 0 ? '待处理' : '已处理'}}</span>
+            </div>
+            <div class="col-24 mt-2 tx-left">
+                <span class="cLightGray pr-1">内容</span>
+                <span>{{item.remark}}</span>
+            </div>
+            </div>
+        </div>
+        </li>
+  {{#  }); }}
+  {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center mt-4">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>
+

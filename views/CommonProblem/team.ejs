@@ -1,0 +1,85 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+      <i class="cu-card__line"></i>
+      <span class="">我的团队</span>
+    </div>
+    <a class="cu-card__subfix" href="/CommonProblem/teamChildren">
+        <span class="fl mr-1">添加工人信息</span>
+        <i class="layui-icon layui-icon-add-1 cBlue fz-28" title="添加工人信息"></i>   
+    </a>
+  </div>
+  <!-- 工人信息 -->
+  <div class="cu-card__main pt-0">
+    <div id="worker-render"></div>
+  </div>
+</div>
+<!-- 获取数据 -->
+<script>
+  $(function(){
+    // 线上地址：[] https://gngrc.rxjy.com http://192.168.1.170:6601
+    // 获取该项目经理下所有工人信息
+    $.ajax({
+          url : "https://gngrc.rxjy.com/project/projectPersonnel/getWorkerMsgByManagerId",
+          type : "GET",
+          data : {managerId: uid},
+          success : function(result) {
+              var getTpl = document.getElementById('worker-template').innerHTML;
+              var view = document.getElementById('worker-render');
+              layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(getTpl).render(result, function(html){
+                  view.innerHTML = html;
+                });
+              })
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+  })
+</script>
+<!-- 团队循环模板 -->
+<script id="worker-template" type="text/html">
+  <ul class="plr-1 pb-1">
+  {{#  layui.each(d.Body, function(index, item){ }}
+    <li class="cu-panel mt-2">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-4">
+          <img width="85px" height="85px" src="{{item.personImg === null ? '/images/noPerson.png' : item.personImg}}">
+        </div>
+        <div class="cu-panel__split col-20">
+          <div class="col-8 tx-left">
+              <span class="cLightGray pr-1">工种</span>
+              <span>{{item.typeValue}}</span>
+          </div>
+          <div class="col-8 tx-left">
+              <span class="cLightGray pr-1">姓名</span>
+              <span>{{item.workerName}}</span>
+          </div>
+          <div class="col-8 tx-left">
+              <span class="cLightGray pr-1">等级</span>
+              <span>{{item.workerLevel}}</span>
+          </div>
+          <div class="col-8 tx-left">
+              <span class="cLightGray pr-1">电话</span>
+              <span>{{item.mobile}}</span>
+          </div>
+          <div class="col-8 tx-left">
+              <span class="cLightGray pr-1">资料是否完善</span>
+              <span class="{{item.workerTypeStatus === 1 ? 'cGreen' : 'cRed'}}">{{item.workerTypeStatus === 1 ? '已完善' : '未完善'}}</span>
+          </div>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>
+

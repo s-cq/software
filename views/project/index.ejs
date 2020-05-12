@@ -1,0 +1,251 @@
+<% layout('projectlayout.ejs') -%>
+<div class="pj__left layui-form">
+    <div id="orderBox">
+        
+    </div>
+</div>
+ 
+
+<script id="ordertpl" type="text/html">
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16 fz-16">
+            <p>项目</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">编号</span>{{d.workOrderInfo.contractNo}}</p>
+            <p class="col-8"><span class="cLightGray pr10">名称</span><span title="{{d.workOrderInfo.proname}}">{{ellipsisText(d.workOrderInfo.proname,10)}}</span></p>
+            <p class="col-8"><span class="cLightGray pr10">单号</span>{{d.workOrderInfo.orderno}}</p>
+            <p class="col-8"><span class="cLightGray pr10">类型</span>{{d.workOrderInfo.evelName}}</p>
+            <p class="col-8"><span class="cLightGray pr10">总金额</span>{{toFixed(d.workOrderInfo.contractFee,2)}}元</p>
+            <p class="col-8"><span class="cLightGray pr10">二维码</span><img src="https://piapi.rxjy.com/actionapi/KGManage/GetProjectQRByRwdId?rwdId={{d.workOrderInfo.orderno}}&width=25&height=25"></p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16">
+            <p>甲方</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">地区</span>{{d.workOrderInfo.dq_name}}</p>
+            <p class="col-8"><span class="cLightGray pr10">公司</span><span title="{{d.workOrderInfo.compName}}">{{ellipsisText(d.workOrderInfo.compName,10)}}</span></p>
+            <p class="col-8"><span class="cLightGray pr10">甲方电话</span>{{d.workOrderInfo.partAChiefMobile}}</p>
+            <p class="col-8"><span class="cLightGray pr10" title="{{d.workOrderInfo.proaddr}}">工程地址</span>{{ellipsisText(d.workOrderInfo.proaddr,10)}}</p>
+            <p class="col-8"><span class="cLightGray pr10" title="{{d.workOrderInfo.proaddr}}">甲方地址</span>{{ellipsisText(d.workOrderInfo.proaddr,10)}}</p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16">
+            <p>日期</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">签订日期</span>{{ellipsisText(formateDate(d.workOrderInfo.designerSignTime),10)}}</p>
+            <p class="col-8"><span class="cLightGray pr10">开工日期</span><span>{{d.workOrderInfo.expectBeginDate}}</span></p>
+            <p class="col-8"><span class="cLightGray pr10">工期</span>{{d.workOrderInfo.ConstructionPeriod}}</p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16">
+            <p>设计师</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">姓名</span>{{d.workOrderInfo.designerUsername}}</p>
+            <p class="col-8"><span class="cLightGray pr10">电话</span><span >{{d.workOrderInfo.designerMobile}}</span></p>
+            <p class="col-8"><span class="cLightGray pr10">配合</span>{{d.workOrderInfo.dManagerName}}</p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2" id="constuct">
+        <div class="cu-panel__title fz-16">
+            <p>合同</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" img class="cBlue pr10 needClick">合同</a><i class="cBlue">{{d.attrInfo.contractTotal}}</i></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">报价</a><i class="cBlue">{{d.attrInfo.offerTotal}}</i></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">其他</a><i class="cBlue">{{d.attrInfo.otherTotal}}</i></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">分项</a><i class="cBlue">{{d.attrInfo.subitemTotal}}</i></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">现场照片</a><i class="cBlue">{{d.attrInfo.sitePhotosTotal}}</i></span></p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2" id="drawing">
+        <div class="cu-panel__title fz-16">
+            <p>图纸</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">效果图</a><i class="cBlue">{{d.attrInfo.effectTotal}}</i></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10 needClick">图纸</a><i class="cBlue">{{d.attrInfo.drawingTotal}}</i></span></p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2" id='offer'>
+        <div class="cu-panel__title fz-16">
+            <p>报价</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">多报</span>{{d.designerQuotes.moreMoney}}</p>
+            <p class="col-8"><span class="cLightGray pr10">少报</span>{{d.designerQuotes.fewMoney}}</p>
+            <p class="col-8"><span class="cLightGray pr10">临时</span>0</p>
+            <p class="col-8"><span class=" pr10"><a href="http://gbjcbl.rxjy.com/MultiLeavel.aspx?flag=3&rwdid={{orderNo}}" class="cBlue pr10">审计成本</a></span></p>
+            <p class="col-8"><span class=" pr10"><a href="https://gbjcbl.rxjy.com/MultiLeavel.aspx?flag=3&rwdid={{orderNo}}" class="cBlue pr10">预览打印</a></span></p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16">
+            <p>款项</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class="cLightGray pr10">总金额</span>{{toFixed(d.workOrderInfo.contractFee,2) }}</p>
+            <p class="col-8"><span class="cLightGray pr10">装饰合同额</span>{{toFixed(d.workOrderInfo.decorationBillFee,2) }}</p>
+            <p class="col-8"><span class="cLightGray pr10">税金</span>{{toFixed(d.workOrderInfo.tax,2) }}</p>
+            <p class="col-8"><span class="cLightGray pr10">折前工程直接费</span>{{toFixed(d.workOrderInfo.beforeDiscountDirectFee,2) }}</p>
+        </div>
+    </div>
+    <div class="cu-panel mt-2" id="issuance">
+        <div class="cu-panel__title fz-16">
+            <p>发包协议</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class=" pr10"><a href="https://gxmgl.rxjy.com//ThirdPM/ShowProtoclItme?orderno={{orderNo}}&uid={{uid}}&type=1" class="cBlue pr10">安全管理协议</a></span></p>
+            <p class="col-8"><span class=" pr10"><a href="https://gxmgl.rxjy.com//ThirdPM/ShowProtoclItme?orderno={{orderNo}}&uid={{uid}}&type=2" class="cBlue pr10">审计成本</a></span></p>
+            <p class="col-8"><span class=" pr10"><a href="https://gxmgl.rxjy.com//ThirdPM/ShowProtoclItme?orderno={{orderNo}}&uid={{uid}}&type=3" class="cBlue pr10">安全生产管理承诺书</a></span></p>
+        </div>
+    </div>
+   
+    <div class="cu-panel mt-2">
+        <div class="cu-panel__title fz-16">
+            <p>回款</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            {{#  layui.each(d.paymentTypeList, function(index, item){ }}
+                <p class="col-8"><span class="cLightGray pr10">款期{{index+1}}</span>{{item.paymentName}}</p>
+                <p class="col-8"><span class="cLightGray pr10">金额</span>{{toFixed(item.paymentFee,2)}}</p>
+                <p class="col-8"><span class="cLightGray pr10">比例</span>{{item.paymentRatio}}</p>
+            {{#  }); }}
+        </div>
+    </div>
+    <div class="cu-panel mt-2" id="material">
+        <div class="cu-panel__title fz-16">
+            <p>材料</p>
+        </div>
+        <div class="cu-panel__main is-not-border lh-26 pa10">
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10">固定材料</a></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10">临时材料</a></span></p>
+            <p class="col-8"><span class=" pr10"><a href="javascript:void(0)" class="cBlue pr10">材料商</a></span></p>
+        </div>
+    </div>
+    <!-- 轮播图 -->
+    <div class="layui-carousel dis-none" id="test1" lay-filter="test1">
+        <div carousel-item class="carouselItem">
+        </div>
+    </div>
+
+</script>
+<div id=""></div>
+<script>
+$(function(){
+       $.ajax({
+            //请求方式
+            type : "get",
+            url : "https://gams.rxjy.com/a/ams/workorderClientInfo/getProInfo",
+            data : {
+                'orderno':orderNo
+            },
+            success : function(result) {
+                var getTpl = ordertpl.innerHTML
+                layui.use('laytpl', function(){
+                  var laytpl = layui.laytpl;
+                  laytpl(getTpl).render(result.body, function(html){
+                    $('#orderBox').html(html);
+                  });
+                })
+                getLoad(result.body.attrInfo)
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        
+        // 轮播图
+        function carouselMent() {
+            layui.use('carousel', function(){
+                var carousel = layui.carousel;
+                //建造实例
+                var ins = carousel.render({
+                    elem: '#test1',
+                    width: '700', //设置容器宽度
+                    height:'700',
+                    arrow: 'always', //始终显示箭头
+                });
+                //监听轮播切换事件
+                carousel.on('change(test1)', function(obj){ 
+                    //test1来源于对应HTML容器的 lay-filter="test1" 属性值
+                    console.log(obj.index); //当前条目的索引
+                    console.log(obj.prevIndex); //上一个条目的索引
+                    console.log(obj.item); //当前条目的元素对象
+                });  
+
+            });
+            // 弹层和放大
+            layui.use('layer', function(){
+            var layer = layui.layer;
+            layer.open({
+                title: [''],
+                shadeClose: true,
+                area: ['700px', '700px'],
+                type: 1,
+                content: $('#test1') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+            });
+            layer.photos({
+                photos: '.photoMent'
+                ,anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            }); 
+            
+            }); 
+        }
+        // 判断哪个图片放进轮播中
+        function panduan(flg,flgName) {
+            flg.forEach(item => {
+                let img = item.split('!')[1].split('#')
+                flgName.push(img[0])
+                $('.carouselItem').append(`<div style="width:700px; height:700px" class="photoMent"><img src="${img[0]}" style="width:700px; height:700px"></div>`)
+                })
+                 // 轮播图
+                 carouselMent()
+        }
+        // 获取图片集合
+       function getLoad (resultImg) {
+        let a = resultImg.contractImg.split(';')//合同
+        let b =  resultImg.offerImg.split(';')//报价
+        let c =  resultImg.otherImg.split(';')//其他
+        let d =  resultImg.sitePhotosImg.split(';')//现场
+        let h =  resultImg.subattrInfo2Img.split(';')//分项
+        let f =  resultImg.effectImg.split(';')//效果图
+        let g =  resultImg.drawingImg.split(';')//图纸
+        $('#orderBox .needClick').click(function(e){
+            let currentImg = []
+            let offerImg = []
+            let otherImg = []
+            let sitePhotosImg = []
+            let subattrInfo2Img = []
+            let effectImg = []
+            let drawingImg = []
+            const currentEle = $(e.target)
+            $('.carouselItem').html('')
+            if (currentEle && currentEle[0].innerText === '合同') {
+                panduan(a,currentImg)
+            }else if (currentEle && currentEle[0].innerText === '报价') {
+                panduan(b,offerImg)
+            }else if (currentEle && currentEle[0].innerText === '其他') {
+                panduan(c,otherImg)
+            }else if (currentEle && currentEle[0].innerText === '现场照片') {
+                panduan(d,sitePhotosImg)
+            }else if (currentEle && currentEle[0].innerText === '分项') {
+                panduan(h,subattrInfo2Img)
+            }else if (currentEle && currentEle[0].innerText === '效果图') {
+                panduan(f,effectImg)
+            }else if (currentEle && currentEle[0].innerText === '图纸') {
+                panduan(g,drawingImg)
+            }
+        })
+        }
+
+})
+</script>

@@ -1,0 +1,82 @@
+<div class="pj__left">
+    <div class="cu-card__title">
+      <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">我的级别</span>
+      </div>
+    </div>
+    <div id="view">
+        
+    </div>
+</div>
+
+<script id="demo" type="text/html">
+    <div  class="cu-panel mt-2" id =“couture”>
+        <div class="cu-panel__main is-not-border tx-center lh-26  pa10">
+            <p class="col-12 pr-8 tx-left  fz-18 cGreen">
+                <span class="cLightGray pr-1">当前级别:</span>
+                <span>{{getCookie('userLevel')}}级</span>
+            </p>
+            <p class="col-12 pr-8 tx-left">
+                <span class="cLightGray pr-1">备注:</span>
+                <span>系统自动升级</span>
+            </p>
+        </div>
+    </div>
+    <ul id="contentList">
+    {{#  layui.each(d, function(index, item){ }}
+      <li class="cu-panel mt-4">
+        <div class="cu-panel__title">
+            <p class="fl pr-8">
+              <span class="cLightGray pr-1">级别等级：</span>
+              <span>{{item.level}}级</span>
+            </p>
+            <p class="fr">
+              <span class="cLightGray pr-1">升级时间：</span>
+              <span>{{item.leveldate}}</span>
+            </p>
+        </div>
+        <div class="cu-panel__main is-not-border tx-center lh-26">
+          <div class="cu-panel__split col-8 tx-left">
+            <p class="tx-left pr-8">
+                <span class="cLightGray pr-1">备注</span>
+                <span>系统自动升级</span>
+            </p> 
+          </div>
+        </div>
+      </li>
+    {{#  }); }}
+    {{#  if(d.length === 0){ }}
+    <div class="tx-center">
+        <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+    {{#  } }} 
+    </ul>
+</script>
+<script>
+    $(function(){
+        $.ajax({
+          //请求方式
+          url : "https://gxmrs.rxjy.com/api/ProjectManager/findLevelDate",
+          type: 'GET',
+          data : {uid},
+          success : function(result) {
+              data=result.Body
+              var getTpl = demo.innerHTML
+              var view = document.getElementById('view');
+              layui.use('laytpl', function(){
+              var laytpl = layui.laytpl;
+              laytpl(getTpl).render(data, function(html){
+                  view.innerHTML = html;
+              });
+          })
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+    })
+</script>
+

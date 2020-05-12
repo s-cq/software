@@ -1,0 +1,99 @@
+
+<div class="pj__left">
+    <ul class="rxadmin-contentnav clearfix pb-0">
+        <li><a data-modelType="4" class="pointer">人工</a></li>
+        <li><a data-modelType="5" class="pointer">材料</a></li>
+        <li><a data-modelType="3" class="pointer">质量</a></li>
+        <li><a data-modelType="1" class="pointer">现场</a></li>
+        <li><a class="active pointer" data-modelType="0">管理</a></li>
+    </ul>
+    <div class="cu-panel__title tx-center mt-2">
+      <p class="col-4">订单名称</p>
+      <p class="col-14">项目名称</p>
+      <p class="col-3">状态</p>
+      <p class="col-3">操作</p>
+    </div>
+    <div id="view" ></div>
+</div>
+<script>
+    // 初始化页面判断
+    $(function() {
+        var preaMent =  $('.rxadmin-contentnav li .active').text()
+        if (preaMent == '管理') {
+            lodas(0)
+        }
+    })
+    // 头部样式
+    $('.rxadmin-contentnav li a').click(function () {
+        $(this).addClass('active').parent().siblings().children().removeClass('active')
+        lodas($(this).attr("data-modelType"))
+    })
+    // 获取数据
+    function lodas(val){
+        if(getCookie("userName")===undefined || getCookie("userName")===null || getCookie("userName")===''){
+            window.location.href= 'login'
+        }
+        var list = {
+            uid,//项目经理uid
+            typeValue : '',//类型名称  如X11 (整改)
+            stage : getQueryString('id')==999?'':getQueryString('id'),//订单状态  0 发起 1执行 2验收
+            modelType : val,//大类  0管理 1现场
+        }
+        $.ajax({
+            //请求方式
+            type : "GET",
+            // url : "http://10.10.8.162:6315/project/orderModel/findOrderModelByUid",
+            url : "https://gpm.rxjy.com/api/project/orderModel/findOrderModelByUid",
+            data : list,
+            success : function(result) {
+                var getTpl = demo.innerHTML
+                var view = document.getElementById('view');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    laytpl(getTpl).render(result, function(html){
+                        view.innerHTML = html;
+                    });
+                })
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status,1111);
+                console.log(e.responseText,11111);
+            }
+        });
+    }
+</script>
+<script id="demo" type="text/html">
+  <ul>
+  {{#  layui.each(d.Body, function(index, item){ }}
+    <li class="cu-panel mt-4">
+        <div class="cu-panel mt-2">
+            <div class="cu-panel__title">
+                <p class="fl">
+                    <span class="cLightGray pr-1">订单号</span>
+                    <span>{{item.orderCode===null?'':item.orderCode}}</span>
+                </p>
+                <p class="fr">{{item.createTime===null?'':formateDate(item.createTime)}}</p>
+            </div>
+            <div class="cu-panel__main is-not-border tx-center lh-26">
+                <div class="cu-panel__split col-4">
+                    <span>{{item.orderName}}</span>
+                </div>
+                <div class="cu-panel__split col-14 tx-center">
+                    <span title="{{item.proName}}">{{item.proName===null?'': ellipsisText(item.proName, 28)}}</span>
+                </div>
+                <div class="cu-panel__split col-3 cGreen" >{{getProjectStage(item.orderStage)}}</div>
+                <div class="cu-panel__split col-3 fz-14">
+                    <a class="cBlue" target="_blank"  href="/order/orderDetails?id=999&orderName={{item.orderName}}&orderCode={{item.orderCode}}&proName={{item.proName}}&orderno={{item.orderno}}&orderStage={{item.orderStage}}" target="_blank">进入订单</a>
+                </div>
+            </div>
+        </div>
+    </li>
+  {{#  }); }}
+  {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center mt-2">
+        <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>

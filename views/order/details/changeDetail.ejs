@@ -1,0 +1,486 @@
+
+<% layout('layoutSimple.ejs') -%>
+<div class="rxadmin-contentnav clearfix">
+    <span class="fz-18">订单详情</span>
+</div>
+<div class="cu-details">
+    <!-- 基本信息 -->
+    <div id="changeDetail-render"></div>
+    <!-- 发起 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>发起</span>
+            </div>
+        </div>
+        <div class="clearfix" id="changeInfo-render"></div>
+    </div>
+     <!-- 执行 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>执行</span>
+            </div>
+        </div>
+        <div id="changeImplement-render"></div>
+    </div>
+    <!-- 验收 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>验收</span>
+            </div>
+        </div>
+        <div id="changeCheck-render"  class="clearfix"></div>
+    </div>
+</div>
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+        viewer();
+        var statusName = ['验收','执行', '发起']; // 订单流
+        var orderStage = ''; // 状态
+        // 获取整改数据
+        getChangeData()
+        function getChangeData() {
+            // 获取整改流
+            var exclusiveIdFlag = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22'
+            $.ajax({
+                url: 'http://10.10.14.29:6315/api/bigAggregateOrder/queryBigAggregateOrderDetail',
+                type: 'POST',
+                data: JSON.stringify({orderCode: 'X11-HZ18066-0',exclusiveIdFlag:exclusiveIdFlag}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        // 订单流模板渲染
+                        var getTpl = document.getElementById('changeDetail-template').innerHTML
+                        var view = document.getElementById('changeDetail-render');
+                        orderStage = result.Body.queryBigAggregateOrderDetails.orderStage
+                        var orderDate = {data:result.Body, statusList: statusName}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(orderDate, function(html){
+                                view.innerHTML = html;
+                            });
+                        });
+                        // 发起信息渲染
+                        var getTplInfo = document.getElementById('changeInfo-template').innerHTML
+                        var viewInfo = document.getElementById('changeInfo-render');
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTplInfo).render(result.Body, function(html){
+                                viewInfo.innerHTML = html;
+                                viewer()
+                            });
+                        });
+                        // 执行内容渲染
+                        var getTplImplement = document.getElementById('changeImplement-template').innerHTML
+                        var viewImplement = document.getElementById('changeImplement-render');
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTplImplement).render(result.Body, function(html){
+                                viewImplement.innerHTML = html;
+                                viewer();
+                                // 上传图片
+                                $("#changeImplement-render .cu-upload__input").each(function() {
+                                    uploads({
+                                        // 上传控件ID
+                                        id: $(this).attr("id"),
+                                        // 是否传多个文件
+                                        mutil: false,
+                                        // 上传文件类型
+                                        mime_types: [{
+                                            title: "Image",
+                                            extensions: "jpg,gif,png"
+                                        }],
+                                        // 上传成功后回调函数 servername 图片域名  filename图片地址 url 图片全地址 id 上传空间ID
+                                        callback: function(servername, filename, url, id) {
+                                             var html = '<li class="cu-upload-list__item viewer">'+
+                                                        '<img class="cu-upload-list__item-thumbnail" width="100px" height="95px" src="'+src+'">'+
+                                                        '<div class="cu-upload-list__item-modal"></div>'+
+                                                        '<div class="cu-upload-list__item-actions">'+
+                                                            '<span class="cu-upload-list__item-preview enlarge_viewer"></span>'+
+                                                            '<span class="cu-upload-list__item-delete"></span>'+
+                                                        '</div>'+
+                                                    '</li>'
+                                            $(this).parents('.uploadBox').find('.cu-upload-list').append(html)
+                                            layer.msg('上传图片成功');
+                                                $(".cu-upload-list__item").click(function() {
+                                                viewer();
+                                            })
+                                        }
+                                    })
+                                });
+                            });
+                        });
+                        // 验收内容渲染
+                        var getTplCheck = document.getElementById('changeCheck-template').innerHTML
+                        var viewCheck = document.getElementById('changeCheck-render');
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTplCheck).render(result.Body, function(html){
+                                viewCheck.innerHTML = html;
+                                viewer()
+                            });
+                        });
+                    }
+                }
+            });
+        }
+        //监听提交
+        form.on('submit(saveChangeDate)', function(data){
+            var changeValue = data.field.changeValue.replace(/\s+/g, "")
+             if (changeValue === '') {
+                layer.msg("描述内容不能忍为空", {icon: 5});
+                return false
+            }
+        });
+        // 保证整改执行的数据
+        function  savebigAggregateOrderFn(content, imgBox) {
+            var isClick = true
+            if (isClick) {
+                var bigAggregate = {
+                    exclusiveIdFlag: `3|${content}#14|${content}#15|${imgBox.length === 0 ? '' : imgBox.join(',')}`,
+                    orderno: getQueryString('orderno'),
+                    contractNo: getQueryString('orderno'),
+                    user_card_no: getCookie('appCardNo'),
+                    userName: getCookie('userName'),
+                    operatorCard: getCookie('appCardNo'),
+                    operatorName: getCookie('userName'),
+                    orderCode: getQueryString('orderCode'),
+                    exclusiveId: 1,
+                    bigAggregateState: 98 // 98表示点击执行确定按钮了
+                }
+                $.ajax({
+                    url: 'https://gpm.rxjy.com/api/bigAggregateOrder/savebigAggregateOrder',
+                    type: 'POST',
+                    data: JSON.stringify(bigAggregate),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.statusCode === 1) {
+                            layer.msg('执行成功')
+                        }
+                    }
+                });
+            }
+        }
+    })
+</script>
+<!-- 基本信息 -->
+<script  id="changeDetail-template" type="text/html">
+    <div class="clearfix cu-card ptb-8">
+        <div class="col-8 tx-center pt-2 bor-dotted-right">
+            <p class="fz-16 mt-2 cLightGray">
+                <span>订单号&nbsp;:</span>
+                <span>{{d.data.queryBigAggregateOrderDetails.orderCode}}</span>
+            </p>
+            <p class="fz-20 fw-bold cLightRed mtb-4">
+                <span class="fw-bold">订单状态&nbsp;:</span>
+                <span class="fw-bold">&nbsp;{{getStage(d.data.queryBigAggregateOrderDetails.orderCode, d.data.queryBigAggregateOrderDetails.orderStage)}}</span>
+            </p>
+            <div>
+                <img class="bor-rad50" src="{{getCookie('photo')}}" width="85px" height="85px" alt="">
+                <p class="fz-20 fw-bold mt-3">{{d.data.queryBigAggregateOrderDetails.userName}}</p>
+                <p class="fz-16 mt-3 cOrange">订单名称：整改</p>
+                <p class="fz-16 mt-3">地区: {{d.data.queryBigAggregateOrderDetails.areaName}}</p>
+            </div>
+        </div>
+        <div class="col-16">
+            {{#  if(Number(d.data.queryBigAggregateOrderDetails.orderStage) === 6){ }}
+                <div class="col-24 mb-6 tx-center fz-14 cLightGray">该订单已经完成,请关注其他订单,要加油哟！</div>
+            {{#  } }}
+            <div class="col-24">
+                <ul class="layui-timeline col-24">
+                    {{#  layui.each(d.statusList, function(index, item){ }}
+                        <li class="clearfix pl-4">
+                            <div class="col-7 fz-12 lh-22 ">
+                                <span class="fr mr-2"> 
+                                    {{# if ( item === '发起') { }}
+                                        {{ d.data.queryBigAggregateOrderDetails.F_START_DATE !== null ? formateDate(d.data.queryBigAggregateOrderDetails.F_START_DATE) : '--' }}
+                                    {{#  } else if ( item === '执行') { }}
+                                        {{ d.data.queryBigAggregateOrderDetails.implementTime !== null ? formateDate(d.data.queryBigAggregateOrderDetails.implementTime) : '--' }}
+                                    {{#  } else if ( item === '验收') { }}
+                                        {{ d.data.queryBigAggregateOrderDetails.acceptanceTime !== null ? formateDate(d.data.queryBigAggregateOrderDetails.acceptanceTime) : '--' }}
+                                    {{#  } }}
+                                </span>
+                            </div>
+                            <ul class="fl">
+                                <li class="layui-timeline-item">
+                                    {{#  if(item === '发起'){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  } else if (item === '执行'){ }}
+                                        {{#  if(Number(d.data.queryBigAggregateOrderDetails.orderStage) ===  1){ }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                        {{#  } else if (Number(d.data.queryBigAggregateOrderDetails.orderStage)  >  1){ }}
+                                            <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                        {{#  }  else { }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                        {{#  }  }}
+                                    {{#  } else if (item === '验收'){ }}
+                                        {{#  if(Number(d.data.queryBigAggregateOrderDetails.orderStage) === 2 ){ }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                        {{#  } else if (Number(d.data.queryBigAggregateOrderDetails.orderStage) > 2){ }}
+                                            <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                        {{#  }  else { }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                        {{#  }  }}
+                                    {{#  } }}
+                                    <div class="layui-timeline-content layui-text">
+                                        <h3 class="layui-timeline-title fz-14 fw-bold">{{item}}</h3>
+                                        <p class="fz-12">订单：
+                                            {{#  if (item === '发起') { }}
+                                                {{d.data.queryBigAggregateOrderDetails.orderCode}} {{Number(d.data.queryBigAggregateOrderDetails.orderStage) >= 1 ? '已于'+formateDate(d.data.queryBigAggregateOrderDetails.F_START_DATE)+'由'+d.data.userInfo.u_xingming+'发起':'等待发起'}}
+                                            {{#  } else if (item === '执行') { }}
+                                                {{d.data.queryBigAggregateOrderDetails.orderCode}} {{Number(d.data.queryBigAggregateOrderDetails.orderStage) > 1 ? '已于'+formateDate(d.data.queryBigAggregateOrderDetails.implementTime)+'执行完成':'等待执行'}}
+                                            {{#  } else if (item === '验收'){ }}
+                                                {{d.data.queryBigAggregateOrderDetails.orderCode}} {{Number(d.data.queryBigAggregateOrderDetails.orderStage) > 2 ? '已于'+formateDate(d.data.queryBigAggregateOrderDetails.acceptanceTime)+'评价完成':'等待评价'}}
+                                            {{#  } }}
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    {{#  }); }}
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- 发起 -->
+<script  id="changeInfo-template" type="text/html">
+    <div class="col-24 ml-2 pr-4">
+        <div class="cu-panel__title tx-center mt-2">
+            <p class="col-6">发起人信息</p>
+            <p class="col-10">订单详情</p>
+            <p class="col-8">图片</p>
+        </div>
+        <div class="col-6 pt-2 pl-1 lh-24 bor-dotted-right">
+            <p class="col-12">
+                <span class="cLightGray pr-1">姓名</span> 
+                <span>{{d.userInfo.u_xingming}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">卡号</span> 
+                <span>{{d.userInfo.u_kahao}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">年龄</span> 
+                <span>{{d.userInfo.u_age}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">工龄</span> 
+                <span>{{d.userInfo.seniority}}月</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">入职</span> 
+                <span>{{formateDate(d.userInfo.u_ruzhitime)}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">地区</span> 
+                <span>{{d.userInfo.dq_name}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">职务</span> 
+                <span>{{d.userInfo.zw_name}}</span>
+            </p>
+        </div>
+        <div class="col-10 lh-24 pt-2  pl-2 bor-dotted-right">
+            <p class="col-24">
+                <span class="cLightGray pr-1">项目名称</span> 
+                <span>{{getQueryString('proName')}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">项目单号</span> 
+                <span>{{d.queryBigAggregateOrderDetails.orderno}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">类型</span> 
+                <span>{{d.queryBigAggregateOrderDetails.type}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">科目</span> 
+                <span>{{d.queryBigAggregateOrderDetails.subject}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">等级</span> 
+                <span>{{d.queryBigAggregateOrderDetails.level}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">金额</span> 
+                <span>{{d.queryBigAggregateOrderDetails.launchMoney}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">积分</span> 
+                <span>{{d.queryBigAggregateOrderDetails.launchIntegral}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">HP</span> 
+                <span>{{d.queryBigAggregateOrderDetails.launchHP}}</span>
+            </p>
+            <p class="col-16">
+                <span class="cLightGray pr-1">结束时间</span> 
+                <span>{{formateDate(d.queryBigAggregateOrderDetails.endTime)}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">问题描述</span> 
+                <span>{{d.queryBigAggregateOrderDetails.remark}}</span>
+            </p>
+        </div>
+        <div class="col-8 pt-2 pl-1">
+            <ul class="cu-upload-list tx-center viewer-images">
+                {{#  if(d.queryBigAggregateOrderDetails.launchPhoto.length > 0){ }}
+                    {{#  layui.each(d.queryBigAggregateOrderDetails.launchPhoto.split(','), function(index, item){ }}
+                        <li class="cu-upload-list__item">
+                            <img class="cu-upload-list__item-thumbnail" width="90px" height="80px" src="{{item}}">
+                        </li>
+                    {{#  }); }}
+                {{#  } }}
+            </ul>
+        </div>
+    </div>
+</script>
+<!-- 执行 -->
+<script  id="changeImplement-template" type="text/html">
+    <div class="clearfix ml-2 pr-4 mt-2">
+        {{#  if(d.queryBigAggregateOrderDetails.orderStage === 1 ){ }}
+            <div class="layui-form"  lay-filter="saveChangeDate">
+                <div class="layui-form-item">
+                    <div class="layui-input-block ml-0">
+                        <textarea name="changeValue" required lay-verify="required" placeholder="请输入执行描述" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="uploadBox">
+                    <ul class="cu-upload-list fl ml-2">
+                        <li class="cu-upload-list__item">
+                            <img class="cu-upload-list__item-thumbnail" width="140px" height="150px" src="https://imgcdn.wenes.cn/1538184851hbfM6h684W.jpg?x-oss-process=image/resize,m_fill,h_150,w_140,limit_0">
+                        </li>
+                    </ul>
+                    <div class="cu-upload fl" style="width:140px;height:150px;">
+                        <span class="cu-upload__icon"></span>
+                        <input type="file" name="file" class="cu-upload__input" id="changeUpload">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="tx-center">
+                        <button class="layui-btn layui-btn-sm layui-btn-normal bind-save" lay-submit  lay-filter="saveChangeDate">保存</button>
+                    </div>
+                </div>
+            </div>
+        {{#  } else { }}
+            <div>
+                <div class="mb-1 ml-1 clearfix">
+                    <p class="col-12">
+                        <span class="cLightGray pr-1">描述</span> 
+                        <span>{{d.queryBigAggregateOrderDetails.implementRemark}}</span>
+                    </p>
+                    <p class="col-12">
+                        <span class="cLightGray pr-1">时间</span> 
+                        <span>{{formateDate(d.queryBigAggregateOrderDetails.implementTime)}}</span>
+                    </p>
+                </div>
+                <ul class="cu-upload-list viewer-images">
+                    {{#  if(d.queryBigAggregateOrderDetails.implementPhoto.length > 0){ }}
+                        {{#  layui.each(d.queryBigAggregateOrderDetails.implementPhoto.split(','), function(index, item){ }}
+                            <li class="cu-upload-list__item">
+                                <img class="cu-upload-list__item-thumbnail" width="140px" height="150px" src="{{item}}">
+                            </li>
+                        {{#  }); }}
+                    {{#  } }}
+                </ul>
+            </div>
+        {{#  } }}
+    </div>
+</script>
+<!-- 验收 -->
+<script  id="changeCheck-template" type="text/html">
+    <div class="col-24 ml-2 pr-4">
+        <div class="cu-panel__title tx-center mt-2">
+            <p class="col-6">验收人信息</p>
+            <p class="col-10">验收详情</p>
+            <p class="col-8">验收图片</p>
+        </div>
+        <div class="col-6 pt-2 pl-1 lh-24 bor-dotted-right">
+            <p class="col-12">
+                <span class="cLightGray pr-1">姓名</span> 
+                <span>{{d.userInfo.u_xingming}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">卡号</span> 
+                <span>{{d.userInfo.u_kahao}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">年龄</span> 
+                <span>{{d.userInfo.u_age}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">工龄</span> 
+                <span>{{d.userInfo.seniority}}月</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">入职</span> 
+                <span>{{formateDate(d.userInfo.u_ruzhitime)}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">地区</span> 
+                <span>{{d.userInfo.dq_name}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">职务</span> 
+                <span>{{d.userInfo.zw_name}}</span>
+            </p>
+        </div>
+        <div class="col-10 lh-24 pt-2  pl-2 bor-dotted-right">
+            <p class="col-8">
+                <span class="cLightGray pr-1">验收金额</span> 
+                <span>{{d.queryBigAggregateOrderDetails.acceptanceMoney}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">验收积分</span> 
+                <span>{{d.queryBigAggregateOrderDetails.acceptanceIntegral}}</span>
+            </p>
+            <p class="col-8">
+                <span class="cLightGray pr-1">验收HP</span> 
+                <span>{{d.queryBigAggregateOrderDetails.acceptanceHP}}</span>
+            </p>
+            <p class="col-24">
+                <span class="cLightGray pr-1">验收内容</span> 
+                <span>{{d.queryBigAggregateOrderDetails.acceptanceRemark}}</span>
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">订单评价</span> 
+                {{#  if(Number(d.queryBigAggregateOrderDetails.acceptanceStandard) === 1 ){ }}
+                    <span class="cRed">中</span>
+                {{# } else if (Number(d.queryBigAggregateOrderDetails.acceptanceStandard) === 2){ }}
+                    <span class="cOrnge">中</span>
+                {{# } else if (Number(d.queryBigAggregateOrderDetails.acceptanceStandard) === 3){ }}
+                    <span class="cOrnge">良</span>
+                {{# } else if (Number(d.queryBigAggregateOrderDetails.acceptanceStandard) === 4){ }}
+                    <span class="cGreen">优</span>
+                {{# } }}
+            </p>
+            <p class="col-12">
+                <span class="cLightGray pr-1">验收时间</span> 
+                <span>{{formateDate(d.queryBigAggregateOrderDetails.acceptanceTime)}}</span>
+            </p>
+        </div>
+        <div class="col-8 pt-2 pl-1">
+            <ul class="cu-upload-list tx-center viewer-images">
+                {{#  if(d.queryBigAggregateOrderDetails.acceptancePhoto.length > 0){ }}
+                    {{#  layui.each(d.queryBigAggregateOrderDetails.acceptancePhoto.split(','), function(index, item){ }}
+                        <li class="cu-upload-list__item">
+                            <img class="cu-upload-list__item-thumbnail" width="90px" height="80px" src="{{item}}">
+                        </li>
+                    {{#  }); }}
+                {{#  } }}
+            </ul>
+            {{#  if(d.queryBigAggregateOrderDetails.acceptancePhoto.length === 0){ }}
+                <div class="tx-center">
+                    暂无图片
+                </div>
+            {{#  } }}
+        </div>
+    </div>
+</script>

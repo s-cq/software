@@ -1,0 +1,1135 @@
+<div class="pj__left layui-form">
+    <%- include('pdmnav.ejs') %>
+    <div class="dis-none titleMent">
+        <h1>当前阶段未开启</h1>
+    </div>
+    <div class="dis-none titleCreted">
+        <div id="caseOne"></div>
+        <div id="caseTwo"></div>
+        <div id="tube"></div>
+        <div id="team"></div>
+        <div id="character"></div>
+    </div>
+    
+</div>
+<script src="/js/jquery.qrcode.min.js"></script>
+<script id='caseOneMent' type="text/html">
+    <!-- 一、案例一-->
+    <div class="cu-card">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">案例一<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden caseOneAll">
+            <div class="layui-form-item ">
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">面积</label>
+                    <div class="layui-input-block">
+                         <input type="text" name="caseAreaOne" autocomplete="off"  value="{{d.represents.representAcreage}}" placeholder="请输入面积" class="layui-input"/>
+                    </div>
+                    <div class="layui-input-block lh-28">
+                        {{d.represents.representAcreage}}
+                   </div>
+                  </div>
+                    <div class="col-12 only-item">
+                        <label class="layui-form-label">类型</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="caseTypeOne" autocomplete="off"  value="{{d.represents.representType}}" placeholder="请输入类型" class="layui-input"/>
+                        </div>
+                        <div class="layui-input-block lh-28">
+                            {{d.represents.representType}}
+                       </div>
+                    </div>
+               </div>
+
+               <div class="layui-form-item">
+                    <div class="col-12 only-item ">
+                        <label class="layui-form-label">预算</label>
+                        <div class="layui-input-block">
+                            <div class="col-20"><input type="text" value="{{d.represents.representCost}}" name="caseBudgetOne" autocomplete="off" placeholder="请输入预算" class="layui-input"></div>
+                            <span class="fl ml-2 lh-30">万</span>
+                        </div>
+                        <div class="layui-input-block lh-28">
+                            {{d.represents.representCost}}万
+                       </div>
+                    </div>
+                    <div class="col-12 only-item">
+                        <label class="layui-form-label">地址</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="caseAddressOne" autocomplete="off"  value="{{d.represents.representAddress}}" placeholder="请输入地址" class="layui-input"/>
+                        </div>
+                        <div class="layui-input-block lh-28">
+                            {{d.represents.representAddress}}
+                       </div>
+                    </div>
+               </div>
+          
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">案例照片</label>
+            <div class="layui-input-block" data-only='1'>
+              <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file" id="51" type='file' >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7" id="uploadImg51">
+                        {{#  layui.each(d.pohotoOne, function(index, item){ }}
+                            <div class="viewer-images relative fl ml10">
+                                <img data-group="" data-src="{{item.url}}" layer-src="{{item.url}}" src="{{item.url}}" width="90px" height="90px" alt="">
+                            </div>
+                        {{#  }); }}
+                    </ul>
+                </div>
+          </div>
+          </div>
+          <div class="tx-right">
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal layui-btn-danger bind-edit" >编辑</button>
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="caseSubmitOne">保存</button>
+          </div>
+        </div>
+    </div>
+</script>
+<script id='caseTwoMent' type="text/html">
+    <!-- 一、案例er-->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">案例二<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden caseTwoAll">
+          <div class="layui-form-item">
+            <div class="col-12 only-item">
+                <label class="layui-form-label">面积</label>
+                <div class="layui-input-block">
+                     <input type="text" name="caseAreaTwo" autocomplete="off"  value="{{d.represents.representAcreage}}" placeholder="请输入面积" class="layui-input"/>
+                </div>
+                <div class="layui-input-block lh-28">
+                    {{d.represents.representAcreage}}
+               </div>
+              </div>
+              <div class="col-12 only-item">
+                <label class="layui-form-label">类型</label>
+                <div class="layui-input-block">
+                     <input type="text" name="caseTypeTwo" autocomplete="off"  value="{{d.represents.representType}}" placeholder="请输入类型" class="layui-input"/>
+                </div>
+                <div class="layui-input-block lh-28">
+                    {{d.represents.representType}}
+               </div>
+              </div>
+          </div>
+          
+          <div class="layui-form-item ">
+            <div class="col-12 only-item">
+                <label class="layui-form-label">预算</label>
+                <div class="layui-input-block">
+                    <div class="col-20"><input type="text" value="{{d.represents.representCost}}" name="caseBudgetTwo" autocomplete="off" placeholder="请输入预算" class="layui-input"></div>
+                    <span class="fl ml-2 lh-30">万</span>
+                </div>
+                <div class="layui-input-block lh-28">
+                    {{d.represents.representCost}}
+               </div>
+              </div>
+              <div class="col-12 only-item">
+                <label class="layui-form-label">地址</label>
+                <div class="layui-input-block">
+                     <input type="text" name="caseAddressTwo" autocomplete="off"  value="{{d.represents.representAddress}}" placeholder="请输入地址" class="layui-input"/>
+                </div>
+                <div class="layui-input-block lh-28">
+                    {{d.represents.representAddress}}
+               </div>
+            </div>
+          </div>
+          
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">案例照片</label>
+            <div class="layui-input-block" data-only='1'>
+              <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file" id="59" type='file' >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                        <ul class="fl upload-list repair mt7" id="uploadImg59">
+                            {{#  layui.each(d.pohotoTwo, function(index, item){ }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.url}}" layer-src="{{item.url}}" src="{{item.url}}" width="90px" height="90px" alt="">
+                                </div>
+                            {{#  }); }}
+                       </ul>
+                </div>
+          </div>
+          </div>
+          <div class="tx-right">
+                 <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal layui-btn-danger bind-edit" >编辑</button>
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="caseSubmitTwo">保存</button>
+          </div>
+        </div>
+    </div>
+    
+</script>
+<script id='tubeMent' type="text/html">
+    <!-- 现场管理 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">现场管理<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden administration">
+            <div class="layui-form-item only-item">
+                <div class="col-12">
+                    <label class="layui-form-label">人员管理</label>
+                    <div class="layui-input-block">
+                           {{#  if(d.personnel_management == null || d.personnel_management == undefined) { }}
+                                <select  name="personnel"  lay-filter="personnel"  >
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                </select>
+                            {{#  } }}
+                            {{#  if(d.personnel_management !== null && d.personnel_management !== undefined) { }}
+                                <select  name="personnel"  lay-filter="personnel"  >
+                                    {{#  if(d.personnel_management== 0) { }}
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                    {{#  } }}
+                                    {{#  if(d.personnel_management== 1) { }}
+                                        <option value="0" >是</option>
+                                        <option value="1" selected>否</option>
+                                    {{#  } }}
+                                </select>
+                            {{#  } }}
+                    </div>
+
+                    <div class="layui-input-block lh-28">
+                         {{#  if(d.personnel_management !== null && d.personnel_management !== undefined) { }}
+                                 {{#  if(d.personnel_management== 0) { }}
+                                     是
+                                 {{#  } }}
+                                 {{#  if(d.personnel_management== 1) { }}
+                                    否
+                                 {{#  } }}
+                         {{#  } }}
+                    </div>
+                    
+                </div>
+
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">现场管理</label>
+                    <div class="layui-input-block">
+                           {{#  if(d.site_management == null || d.site_management == undefined) { }}
+                                <select  name="scene"  lay-filter="scene"  >
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                </select>
+                            {{#  } }}
+                            {{#  if(d.site_management !== null && d.site_management !== undefined) { }}
+                                <select  name="scene"  lay-filter="scene"  >
+                                    {{#  if(d.site_management== 0) { }}
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                    {{#  } }}
+                                    {{#  if(d.site_management== 1) { }}
+                                        <option value="0" >是</option>
+                                        <option value="1" selected>否</option>
+                                    {{#  } }}
+                                </select>
+                            {{#  } }}
+                    </div>
+
+                    <div class="layui-input-block lh-28">
+                        {{#  if(d.site_management !== null && d.site_management !== undefined) { }}
+                                {{#  if(d.site_management== 0) { }}
+                                    是
+                                {{#  } }}
+                                {{#  if(d.site_management== 1) { }}
+                                   否
+                                {{#  } }}
+                        {{#  } }}
+                   </div>
+                </div>
+            </div>
+            
+
+            <div class="layui-form-item">
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">材料管理</label>
+                    <div class="layui-input-block">
+                           {{#  if(d.material_management == null || d.material_management == undefined) { }}
+                                <select  name="material"  lay-filter="material"  >
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                </select>
+                            {{#  } }}
+                            {{#  if(d.material_management !== null && d.material_management !== undefined) { }}
+                                <select  name="material"  lay-filter="material"  >
+                                    {{#  if(d.material_management== 0) { }}
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                    {{#  } }}
+                                    {{#  if(d.material_management== 1) { }}
+                                        <option value="0" >是</option>
+                                        <option value="1" selected>否</option>
+                                    {{#  } }}
+                                </select>
+                            {{#  } }}
+                    </div>
+                    <div class="layui-input-block lh-28">
+                        {{#  if(d.material_management !== null && d.material_management !== undefined) { }}
+                                {{#  if(d.material_management== 0) { }}
+                                    是
+                                {{#  } }}
+                                {{#  if(d.material_management== 1) { }}
+                                   否
+                                {{#  } }}
+                        {{#  } }}
+                   </div>
+                </div>
+
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">资金管理</label>
+                    <div class="layui-input-block">
+                           {{#  if(d.money_management == null ||  d.money_management == undefined) { }}
+                                <select  name="capital"  lay-filter="capital"  >
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                </select>
+                            {{#  } }}
+                            {{#  if(d.money_management !== null && d.money_management !== undefined) { }}
+                                <select  name="capital"  lay-filter="capital"  >
+                                    {{#  if(d.money_management== 0) { }}
+                                        <option value="0" selected>是</option>
+                                        <option value="1">否</option>
+                                    {{#  } }}
+                                    {{#  if(d.money_management== 1) { }}
+                                        <option value="0" >是</option>
+                                        <option value="1" selected>否</option>
+                                    {{#  } }}
+                                </select>
+                            {{#  } }}
+                    </div>
+                    <div class="layui-input-block lh-28">
+                        {{#  if(d.money_management !== null && d.money_management !== undefined) { }}
+                                {{#  if(d.money_management== 0) { }}
+                                    是
+                                {{#  } }}
+                                {{#  if(d.money_management== 1) { }}
+                                   否
+                                {{#  } }}
+                        {{#  } }}
+                   </div>
+                </div>
+            </div>
+            <div class="tx-right">
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal layui-btn-danger bind-edit" >编辑</button>
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="conditionBasics">保存</button>
+          </div>
+        </div>
+    </div>
+</script>
+<script id='teamMent' type="text/html">
+    <!-- 团队 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">团队<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden teamAll">
+          <div class="layui-form-item">
+            <label class="layui-form-label">团队</label>
+            <div class="layui-input-block">
+                <div class="brandQRCode fl mt5" class=""></div>
+                <span class="ml10">团队</span><span>{{d.reviewCount.workerCount}}人</span>
+            </div>
+          </div>
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">擅长</label>
+            <div class="layui-input-block" id="likeMent">
+                <div class="col-6">
+                   <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="办公" value="1" class="mt10 col-2 teamCheck active ">
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="餐饮" value="2" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="商业" value="3" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="酒店" value="4" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="教育" value="6" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="会所" value="7" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="家装" value="8" class="mt10 col-2 teamCheck active ">
+                 </div>
+                 <div class="col-6">
+                    <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="别墅" value="9" class="mt10 col-2 teamCheck active ">
+                 </div>
+            </div>
+            <div class="layui-input-block lh-28" id="likeTeamOrder">
+            </div>
+          </div>
+        </div>
+          <div class="tx-right">
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal layui-btn-danger bind-edit" >编辑</button>
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save  dis-none" lay-submit lay-filter="conditionTeam">保存</button>
+          </div>
+    </div>
+
+    
+</script>
+<script id='characterMent' type="text/html">
+    <!-- 性格 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">性格<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden characPressMent">
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">性格</label>
+            <div class="layui-input-block" id="characterAll">
+                <div class="col-8">
+                    <input type="radio" name="teamOne" value="1" title="开朗" checked="">
+                    <input type="radio" name="teamOne" value="2" title="谨慎" >
+                </div>
+                <div class="col-8">
+                    <input type="radio" name="teamTwo" value="1" title="感性" checked="">
+                    <input type="radio" name="teamTwo" value="2" title="理性" >
+                </div>
+
+                <div class="col-8">
+                    <input type="radio" name="teamThree" value="1" title="敏感" checked="">
+                    <input type="radio" name="teamThree" value="2" title="随和" >
+                </div>
+                <div class="col-8">
+                    <input type="radio" name="teamFour" value="1" title="细致" checked="">
+                    <input type="radio" name="teamFour" value="2" title="粗糙" >
+                </div>
+                <div class="col-8">
+                    <input type="radio" name="teamFive" value="1" title="活泼" checked="">
+                    <input type="radio" name="teamFive" value="2" title="稳重" >
+                </div>
+            </div>
+            <div class="layui-input-block lh-28" id="teamMentOrder">
+            </div>
+          </div>
+          <div class="tx-right">
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal layui-btn-danger bind-edit" >编辑</button>
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="conditionCharacter">保存</button>
+      </div>
+          </div>
+          
+    </div>
+    
+</script>
+
+<style>
+    .order-upload{
+        width: 60px;
+        height: 60px;
+        padding: 15px;
+    }
+    .dis-none{
+        display: none;
+    }
+    .viewer-images{
+        z-index: 1000;
+    }
+</style>
+<script>
+    layui.use(['form', 'upload'], function(){
+    var form = layui.form;
+    var upload = layui.upload;
+    var uid = getCookie('uid');
+    var http18 = 'https://gxmrs.rxjy.com'
+    var findStagInfo = {}
+    var reviewCount = {}
+    findStagInfoById()
+    var represents = [] // 案例
+    findPhotoByUid()
+    function findPhotoByUid() {
+        var pohotoOne = []
+        var pohotoTwo = []
+        var obj ={
+            uid: uid,
+            attrModelid: '51'
+        }
+        var objTwo ={
+            uid: uid,
+            attrModelid: '59'
+        }
+        $.ajax({
+          type: 'get',
+          url: http18 + '/a/api/person/findPhotoByUid',
+          data: obj,
+        }).done(result => {
+            pohotoOne = result.Body
+            $.ajax({
+            type: 'get',
+            url: http18 + '/a/api/person/findPhotoByUid',
+            data: objTwo,
+            }).done(result => {
+                pohotoTwo = result.Body
+                getRepresentListByUid(pohotoOne,pohotoTwo)
+            })
+        })
+    };
+    function getRepresentListByUid(pohotoOne,pohotoTwo) {
+        $.ajax({
+          type: 'get',
+          url: http18 + '/a/person/case/getRepresentListByUid',
+          data: { uid: uid },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            represents = result.Body.represents;
+            var objOne = {}
+            var objTwo = {}
+            if (represents.length > 0) {
+                var objOne = {
+                    'represents': result.Body.represents[0],
+                    'findStagInfo': findStagInfo,
+                    'pohotoOne': pohotoOne
+                }
+            } else {
+                var obj ={
+                    'representAcreage': '',
+                    'representType': '',
+                    'representCost': '',
+                    'representAddress': ''
+                }
+                objOne = {
+                    'represents': obj,
+                    'findStagInfo': findStagInfo,
+                    'pohotoOne': pohotoOne
+                }
+            }
+            if (represents.length > 1) {
+                var objTwo = {
+                    'represents': result.Body.represents[1],
+                    'findStagInfo': findStagInfo,
+                    'pohotoTwo': pohotoTwo
+                }
+            } else {
+                var obj ={
+                    'representAcreage': '',
+                    'representType': '',
+                    'representCost': '',
+                    'representAddress': ''
+                }
+                var objTwo = {
+                    'represents': obj,
+                    'findStagInfo': findStagInfo,
+                    'pohotoTwo': pohotoTwo
+                }
+            }
+            //  案例一
+            var getTpl = caseOneMent.innerHTML
+            ,view = document.getElementById('caseOne');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(getTpl).render(objOne, function(html){
+                view.innerHTML = html;
+                });
+            })
+            //  案例二
+            var getTpl = caseTwoMent.innerHTML
+            ,view = document.getElementById('caseTwo');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(getTpl).render(objTwo, function(html){
+                view.innerHTML = html;
+                });
+            })
+            layer.photos({
+                photos: '.viewer-images'
+                ,anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+
+          }
+          if (represents.length > 0) {
+            $('.caseOneAll').find('.only-item').each(function() {
+                if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).hide()
+                } else {
+                    $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                }
+            });
+          } else {
+            $('.caseOneAll').find('.only-item').each(function() {
+                if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).show()
+                } else {
+                    $(this).find('.layui-input-block').eq(1).addClass('dis-none');
+                }
+            });
+            $('.caseOneAll').find('.bind-save').eq(0).removeClass('dis-none').siblings().addClass('dis-none')
+          }
+          if (represents.length > 1) {
+            $('.caseTwoAll').find('.only-item').each(function() {
+                if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).hide()
+                } else {
+                    $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                }
+            });
+          } else {
+            $('.caseTwoAll').find('.only-item').each(function() {
+                if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).show()
+                } else {
+                    $(this).find('.layui-input-block').eq(1).addClass('dis-none');
+                }
+            });
+            $('.caseTwoAll').find('.bind-save').eq(0).removeClass('dis-none').siblings().addClass('dis-none')
+          }
+
+          showAll(1)
+          form.render()
+          uploadFunction()
+        });
+    }
+    // 查询现场管理
+    function findStagInfoById(){
+        $.ajax({
+            type: 'get',
+            url: http18 + '/api/ProjectManager/findStageInfoById',
+            data: { uid: uid },
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                findStagInfo = result.Body
+                character()
+               //  现场管理
+                var getTpl = tubeMent.innerHTML
+                ,view = document.getElementById('tube');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    laytpl(getTpl).render(result.Body, function(html){
+                    view.innerHTML = html;
+                   });
+                }) 
+                form.render()
+                if (findStagInfo.st_id >= 3) {
+                    $('.titleCreted').removeClass('dis-none')
+                } else {
+                    $('.titleMent').removeClass('dis-none')
+                }
+                showAll(1)
+                if (findStagInfo.personnel_management !== null && findStagInfo.personnel_management !== undefined && findStagInfo.personnel_management !== '') {
+                    $('.administration').find('.only-item').each(function() {
+                        $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                    });
+                } else {
+                    $('.administration').find('.only-item').each(function() {
+                            $(this).find('.layui-input-block').eq(1).addClass('dis-none').siblings().removeClass('dis-none');
+                    });
+                    $('.administration').find('.bind-save').eq(0).removeClass('dis-none').siblings().addClass('dis-none')
+                }
+                
+            }
+        });
+    };
+    getWorkerReviewCount()
+    // 团队 人数 
+    function getWorkerReviewCount(){
+        $.ajax({
+            type: 'get',
+            url: 'https://gngrc.rxjy.com/project/branchStatistic/getWorkerReviewCount',
+            data: { managerId: uid },
+        }).done(result => {
+            if (result.StatusCode === 1) {
+               //  团队
+               reviewCount = result.Body
+               getPmWorkAreaByUid()
+            }
+        });
+        form.render()
+    };
+    // 团队 擅长
+    function getPmWorkAreaByUid() {
+        $.ajax({
+            type: 'get',
+            url: http18 + '/a/matters/userinfo/getPmWorkAreaByUid',
+            data: { uid: uid },
+        }).done(result => {
+            if (result.StatusCode === 0) {
+               //  团队
+                var getTpl = teamMent.innerHTML
+                ,view = document.getElementById('team');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    var obj ={
+                        'reviewCount': reviewCount,
+                        'findStagInfo': findStagInfo,
+                        'areaByUid': result.Body
+                    }
+                    laytpl(getTpl).render(obj, function(html){
+                    view.innerHTML = html;
+                    });
+                })
+                var typeValueList = []
+                if (result.Body.typeValue !== undefined) {
+                    typeValueList = result.Body.typeValue.split(',')
+                }
+                var prrMnet = [{value: 1,name: '办公'},{value: 2,name: '餐饮'},{value: 3,name: '商业'},{value: 4,name: '酒店'},{value: 6,name: '教育'},{value: 7,name: '会所'},{value: 8,name: '家装'},{value: 9,name: '别墅'},]
+                prrMnet.forEach(item =>{
+                    typeValueList.forEach(otem =>{
+                        if (item.value == otem) {
+                            item.only = 1
+                        }
+                    })
+                })
+                var html = ''
+                likeTeamList = []
+                var prrMnetHtml = ''
+                prrMnet.forEach(item =>{
+                    if (item.only == 1) {
+                    prrMnetHtml += `<span class="mr10">${item.name}</span>`
+                    likeTeamList.push({likeTeamValue: item.value})
+                        html += `<div class="col-6">
+                        <input type="checkbox" name="like[write]" lay-filter="likeTeam" title="${item.name}" value="${item.value}" class="mt10 col-4 teamCheck" checked="">
+                        </div>
+                        `
+                    } else {
+                        html += `<div class="col-6"><input type="checkbox" name="like[write]" lay-filter="likeTeam" title="${item.name}" value="${item.value}" class="mt10 col-4 teamCheck active"> </div>`
+                    }
+                })
+                $('#likeMent').html(html)
+                $('#likeTeamOrder').html(prrMnetHtml)
+                if ( result.Body.typeValue !== undefined) {
+                    $('.teamCheck.active').attr('disabled', 'disabled');
+                }
+
+                if (result.Body.typeValue !== null  && result.Body.typeValue !== undefined && result.Body.typeValue !== '') {
+                    $('.teamAll').find('.only-item').each(function() {
+                        $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                    });
+                } else {
+                    $('.teamAll').find('.only-item').each(function() {
+                            $(this).find('.layui-input-block').eq(1).addClass('dis-none').siblings().removeClass('dis-none');
+                    });
+                    $('.teamAll').find('.bind-save').eq(0).removeClass('dis-none').siblings().addClass('dis-none')
+                }
+                
+                form.render()
+                qrCode()
+                uploadFunction()
+                showAll(1)
+            }
+        });
+    }
+     //  性格
+    function character(){
+        var getTpl = characterMent.innerHTML
+        ,view = document.getElementById('character');
+        layui.use('laytpl', function(){
+            var laytpl = layui.laytpl;
+            var obj ={
+                'findStagInfo': findStagInfo
+            }
+            console.log(obj)
+            laytpl(getTpl).render(obj, function(html){
+            view.innerHTML = html;
+            });
+        })
+        form.render()
+        var characterList = []
+        if (findStagInfo.character_type !== undefined) {
+            characterList = findStagInfo.character_type.split(',')
+        }
+        var characterHtml = ''
+        var teamMnetHtml = ''
+        characterList.forEach((item, index) =>{
+            if (index == 0) {
+                if (item.split('-')[1] == 1) {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamOne" value="1" title="开朗" checked="">
+                             <input type="radio" name="teamOne" value="2" title="谨慎" >
+                             </div>
+                             `
+                             teamMnetHtml += `<span class="mr10">开朗</span>`
+                } else {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamOne" value="1" title="开朗" >
+                             <input type="radio" name="teamOne" value="2" title="谨慎" checked="">
+                            </div>
+                             `
+                             teamMnetHtml += `<span class="mr10">谨慎</span>`
+                }
+            } else if (index == 1) {
+                if (item.split('-')[1] == 1) {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamTwo" value="1" title="感性" checked="">
+                             <input type="radio" name="teamTwo" value="2" title="理性" >
+                            </div>
+                             `
+                             teamMnetHtml += `<span class="mr10">感性</span>`
+                } else {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamTwo" value="1" title="感性" >
+                             <input type="radio" name="teamTwo" value="2" title="理性" checked="">
+                            </div>
+                             `
+                             teamMnetHtml += `<span class="mr10">理性</span>`
+                }
+            } else if (index == 2) {
+                if (item.split('-')[1] == 1) {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamThree" value="1" title="敏感" checked="">
+                             <input type="radio" name="teamThree" value="2" title="随和" >
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">敏感</span>`
+                } else {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamThree" value="1" title="敏感" >
+                             <input type="radio" name="teamThree" value="2" title="随和" checked="">
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">随和</span>`
+                }
+            } else if (index == 3) {
+                if (item.split('-')[1] == 1) {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamFour" value="1" title="细致" checked="">
+                             <input type="radio" name="teamFour" value="2" title="粗糙" >
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">细致</span>`
+                } else {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamFour" value="1" title="细致" >
+                             <input type="radio" name="teamFour" value="2" title="粗糙" checked="">
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">粗糙</span>`
+                }
+            } else if (index == 4) {
+                if (item.split('-')[1] == 1) {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamFive" value="1" title="活泼" checked="">
+                             <input type="radio" name="teamFive" value="2" title="稳重" >
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">活泼</span>`
+                } else {
+                    characterHtml += `<div class="col-8">
+                             <input type="radio" name="teamFive" value="1" title="活泼" >
+                             <input type="radio" name="teamFive" value="2" title="稳重" checked="">
+                            </div>`
+                            teamMnetHtml += `<span class="mr10">稳重</span>`
+                }
+            }
+        })
+        if (characterList.length > 0) {
+            $('#characterAll').html(characterHtml)
+            $('#teamMentOrder').html(teamMnetHtml)
+            $('.characPressMent').find('.only-item').each(function() {
+                $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+            });
+        } else {
+            $('.characPressMent').find('.only-item').each(function() {
+                    $(this).find('.layui-input-block').eq(1).addClass('dis-none').siblings().removeClass('dis-none');
+            });
+            $('.characPressMent').find('.bind-save').eq(0).removeClass('dis-none').siblings().addClass('dis-none')
+        }
+        showAll(1)
+
+    }
+    function showAll(){
+        $('.bind-edit').click(function (){
+            $(this).addClass('dis-none').siblings().removeClass('dis-none')
+            $(this).parent().parent().find('.only-item').each(function() {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).show()
+                    $(this).find('.layui-input-block').eq(0).removeClass('dis-none').siblings().eq(1).addClass('dis-none');
+            });
+        })
+        $('.bind-save').click(function (){
+            $(this).addClass('dis-none').siblings().removeClass('dis-none')
+            $(this).parent().parent().find('.only-item').each(function() {
+                if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                    $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).hide()
+                } else {
+                    $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                }
+            });
+        })
+    }
+    
+    
+    function qrCode() {
+        // 生成规则如下
+        $(".brandQRCode").each(function (index, domEle) {
+            // 生成规则如下
+            var url = "https://ggrlm.rxjy.com/static/register/recommend.html?sourceId=5175&sourceType=3&sourceName=%E5%AE%81%E5%B3%B0%27&sourceAreaId=12";
+            $(domEle).attr("data-href", url);
+            $(domEle).qrcode({
+                width: 84,
+                height: 84,
+                correctLevel: 0,
+                background: "#efeef3", //背景颜色
+                foreground: "black", //前景颜色
+                text: url
+            });
+        });
+    } 
+    
+    form.on('submit(conditionBasics)', function(data){
+        var data = data.field
+        var obj = {
+            uid: uid,
+            personnelManagement: data.personnel, // 人员
+            siteManagement: data.scene, // 现场
+            materialManagement: data.material, // 材料
+            moneyManagement: data.capital, // 资金
+        }
+        $.ajax({
+          type: 'post',
+          url: http18 + '/api/stageInfo/updateStageInfoByleId',
+          data: obj,
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              layer.msg('保存成功')
+              findStagInfoById()
+              findPhotoByUid()
+          }  
+        });
+    })
+    // 案例一提交
+    form.on('submit(caseSubmitOne)', function(data){
+        console.log(data)
+        var data = data.field
+        if (data.caseAreaOne == '') {
+            layer.msg('案例一面积未填写')
+            return
+        }
+        if (data.caseAddressOne == '') {
+            layer.msg('案例一地址未填写')
+            return
+        }
+        if (data.caseBudgetOne == '') {
+            layer.msg('案例一预算未填写')
+            return
+        }
+        if (data.caseTypeOne == '') {
+            layer.msg('案例一类型未填写')
+            return
+        }
+        // 判断数组有没有值  新增和 修改
+        if (represents.length > 0) {
+            var obj = {
+                'representAcreage': data.caseAreaOne,// 面积
+                'representAddress': data.caseAddressOne,// 地址
+                'representCost': data.caseBudgetOne, //预算
+                'representType': data.caseTypeOne,// 类型
+                'id': represents[0].id
+            }
+            updateRepesent(obj)
+        } else {
+            var obj = {
+                'representAcreage': data.caseAreaOne,// 面积
+                'representAddress': data.caseAddressOne,// 地址
+                'representCost': data.caseBudgetOne, //预算
+                'representType': data.caseTypeOne,// 类型
+                'uid': uid
+            }
+            insertRepesent(obj)
+        }
+        
+    })
+    // 案例二提交
+    form.on('submit(caseSubmitTwo)', function(data){
+        var data = data.field
+        if (data.caseAreaTwo == '') {
+            layer.msg('案例二面积未填写')
+            return
+        }
+        if (data.caseAddressTwo == '') {
+            layer.msg('案例二地址未填写')
+            return
+        }
+        if (data.caseBudgetTwo == '') {
+            layer.msg('案例二预算未填写')
+            return
+        }
+        if (data.caseTypeTwo == '') {
+            layer.msg('案例二类型未填写')
+            return
+        }
+        // 判断数组有没有值  新增和 修改
+        if (represents.length > 1) {
+            var obj = {
+                'representAcreage': data.caseAreaTwo,// 面积
+                'representAddress': data.caseAddressTwo,// 地址
+                'representCost': data.caseBudgetTwo, //预算
+                'representType': data.caseTypeTwo,// 类型
+                'id': represents[0].id
+            }
+            updateRepesent(obj)
+        } else {
+            var obj = {
+                'representAcreage': data.caseAreaTwo,// 面积
+                'representAddress': data.caseAddressTwo,// 地址
+                'representCost': data.caseBudgetTwo, //预算
+                'representType': data.caseTypeTwo,// 类型
+                'uid': uid
+            }
+            insertRepesent(obj)
+        }
+        
+    })
+    // 保存团队
+    form.on('submit(conditionTeam)', function(data){
+        var obj ={
+            typeValue: typeValue,
+            uid: uid
+        }
+        $.ajax({
+            type: 'post',
+            url: http18 + '/a/matters/userinfo/updateUserInfoTypeValue',
+            data: JSON.stringify(obj),
+            contentType: "application/json; charset=utf-8",
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                layer.msg('保存成功')
+               
+            }
+        });
+    })
+   // 保存性格
+    form.on('submit(conditionCharacter)', function(data){
+        var data = data.field
+        var characterType = '1-' + data.teamOne +','+  '2-' + data.teamTwo + ',' + '3-' + data.teamThree + ',' + '4-' + data.teamFour + ',' + '5-' + data.teamFive
+        var obj ={
+            uid: uid,
+            characterType: characterType
+        }
+        $.ajax({
+            type: 'post',
+            url: http18 + '/api/stageInfo/updateStageInfoByleId',
+            data: obj,
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                layer.msg('保存成功')
+            }
+        });
+    })
+    var likeTeamList = []
+    var typeValue = ''
+    // 监听 团队 多选
+    form.on('checkbox(likeTeam)', function(data){
+        typeValue = ''
+        if (data.elem.checked) {
+          $(this).removeClass('active')
+            likeTeamList.push({likeTeamValue: data.value})
+            if (likeTeamList.length == 4) {
+                $('.teamCheck.active').attr('disabled', 'disabled');
+                form.render()
+            }
+        } else {
+            $(this).addClass('active')
+            likeTeamList = likeTeamList.filter(item => Number(item.likeTeamValue) !== Number(data.value))
+            if (likeTeamList.length == 3) {
+                $('.teamCheck').removeAttr('disabled');
+            }
+            form.render()
+        }
+        likeTeamList.forEach(item =>{
+            typeValue = typeValue == '' ? item.likeTeamValue : typeValue +','+ item.likeTeamValue
+        })
+    })
+    // 修改 案例
+    function updateRepesent(params) {
+        $.ajax({
+          type: 'post',
+          url: http18 + '/a/person/case/updateRepesent',
+          data: JSON.stringify(params),
+          contentType: "application/json; charset=utf-8",
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              layer.msg(result.Body)
+              findPhotoByUid()
+          }  
+        });
+    }
+    // 增加 案例
+    function insertRepesent(params) {
+        $.ajax({
+          type: 'post',
+          url: http18 + '/a/person/case/insertRepesent',
+          data: JSON.stringify(params),
+          contentType: "application/json; charset=utf-8",
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              layer.msg(result.Body)
+              gfindPhotoByUid()
+          }  
+        });
+    }
+    /**
+       * 身份证照片 学历 证件上传
+       */
+      var photo = []
+       function savePhotoByUid(attrModelid, FileUrl) {
+        const obj = {
+          uid: uid,
+          attrModelid,
+          userType: 1,
+          attrServerUrl: '',
+          attrFileUrl: FileUrl,
+        };
+        $.ajax({
+          type: 'post',
+          url: http18 + '/a/api/person/savePhotoByUid',
+          data: obj,
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              var html =''
+              photo.forEach(item =>{
+                  if (item.id == attrModelid) {
+                    html += `<div class="viewer-images relative fl ml10">
+                        <img data-group="" data-src="${item.url}" layer-src="${item.url}" src="${item.url}" width="90px" height="90px" alt="">
+                    </div>`
+                  }
+              })
+              
+             $('#uploadImg' + attrModelid).append(html)
+             layer.photos({
+                photos: '.viewer-images'
+                ,anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+            //  findPhotoByUid()
+            layer.msg('上传成功');
+          }
+        });
+      };
+    function uploadFunction(){
+        $(".file").each(function() {
+            uploads({
+                // 上传控件ID
+                id: $(this).attr("id"),
+                // 是否传多个文件
+                mutil: true,
+                // 上传文件类型
+                mime_types: [{
+                    title: "Image",
+                    extensions: "jpg,gif,png"
+                }],
+                // 上传成功后回调函数 servername 图片域名  filename图片地址 url 图片全地址 id 上传空间ID
+                callback: function(servername, filename, url, id) {
+                    photo.push({id: id,url: url})
+                    savePhotoByUid(id,url )
+                }
+            })
+            })  
+    }
+});
+           
+   
+</script>

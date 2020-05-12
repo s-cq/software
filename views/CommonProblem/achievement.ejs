@@ -1,0 +1,111 @@
+<div class="pj__left">
+    <div class="cu-card__title">
+      <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">我的成就</span>
+      </div>
+    </div>
+    <div id="view">
+        
+    </div>
+</div>
+<script>
+    $(function(){
+      $.ajax({
+          //请求方式
+          type : "get",
+          url : "https://gxmrs.rxjy.com/a/api/person/findAchievementByUid",
+          data : {
+              'uid':uid,
+          },
+          success : function(result) {
+              var param = {"uid":uid}
+              $.ajax({
+                  //请求方式
+                  url : "https://gxmrs.rxjy.com/stay/stayManage/getPMUpgradeMsg",
+                  type: 'POST',
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data : JSON.stringify(param),
+                  success : function(resultData) {
+                      let data = {  a:'',b:''}
+                      data.a =result.Body
+                      data.b = resultData.Body
+                      var getTpl = demo.innerHTML
+                      var view = document.getElementById('view');
+                      layui.use('laytpl', function(){
+                      var laytpl = layui.laytpl;
+                      laytpl(getTpl).render(data, function(html){
+                          view.innerHTML = html;
+                        });
+                      })
+                  },
+                  //请求失败，包含具体的错误信息
+                  error : function(e){
+                      console.log(e.status);
+                      console.log(e.responseText);
+                  }
+              });
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+    })
+</script>
+
+<script id="demo" type="text/html">
+    <div  class="cu-panel mt-2" id =“couture”>
+        <div class="cu-panel__main is-not-border tx-center lh-26  pa10">
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">合同总额</span>
+                <span>{{d.a.received/10000}}万</span>
+              </p> 
+              <p class="col-8 pr-8 tx-left">
+                <span class="cLightGray pr-1">完工总额</span>
+                <span>{{d.a.completionFeeCount/10000}}万</span>
+              </p>
+              <p class="col-4 pr-8 tx-left">
+                <span class="cLightGray pr-1">级别额</span>
+                <span>{{d.b[0].le_complete/10000}}万</span>
+              </p>
+              <p class="col-4 pr-8 tx-left">
+                <span class="cLightGray pr-1">下一级</span>
+                <span>{{d.b[0].NLe>12?d.b[0].le_level:d.b[0].NLe}}级</span>
+              </p>
+        </div>
+    </div>
+    <ul id="contentList">
+    {{#  layui.each(d.a.achList, function(index, item){ }}
+      <li class="cu-panel mt-4">
+        <div class="cu-panel__title">
+          <p class="fl pr-8">
+            <span class="cLightGray pr-1">项目名称</span>
+            <span>{{item.proname}}</span>
+          </p>
+        </div>
+        <div class="cu-panel__main is-not-border tx-center lh-26">
+          <div class="cu-panel__split col-8 tx-left">
+            <p class="col-8 pr-8 tx-left">
+              <span class="cLightGray pr-1">项目单号</span>
+              <span class="integralbalance">{{item.orderno}}</span>
+            </p>
+            <p class="col-8 pr-8 tx-left">
+              <span class="cLightGray pr-1">完工金额：</span>
+              <span class="integralbalance">{{toFixed(item.completionFee,2)}}元</span>
+            </p>
+            <p class="col-8 pr-8 tx-left">
+              <span class="cLightGray pr-1">合同金额：</span>
+              <span class="integralbalance">{{toFixed(item.grossProfitReceived,2)}}元</span>
+            </p>
+          </div>
+        </div>
+      </li>
+    {{#  }); }}
+    {{#  if(d.a.length === 0){ }}
+      无数据
+    {{#  } }} 
+    </ul>
+  </script>

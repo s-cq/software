@@ -1,0 +1,109 @@
+<div class="pj__left">
+    <div class="cu-card__title">
+      <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">我的消息</span>
+      </div>
+    </div>
+    <div class="mt-2">
+      <ul class="rxadmin-contentnav clearfix pb-0" id="informationnav"></ul>
+    </div>
+    <div id="informationbox"> </div>
+</div>
+
+<script id="informationnavtpl" type="text/html">
+    {{#  layui.each(d.Body, function(index, item){ }}
+    <li><a onclick="getInfor($(this),{{item.group_id}})" href="javascript:">{{item.group_name}}({{item.notice_count}})</a></li>
+    {{#  }); }}
+</script>
+
+<script id="informationtpl" type="text/html">
+    {{#  layui.each(d.Body, function(index, item){ }}
+    <div class="cu-panel mt-4"> 
+        <div class="cu-panel__title"> 
+            <p class="fl">{{item.title}}</p>
+            <p class="fr">
+            {{#  if(item.state == 0){ }}
+                <span class="cRed">未读</span>
+            {{#  } else { }}
+                <span class="cGreen">已读</span>
+            {{# } }}
+            </p> 
+            <p class="fr pr-2">
+                <span class="cLightGray pr-2">发布时间</span><span>{{item.create_date}}</span>
+            </p> 
+        </div> 
+        <div class="cu-panel__main is-not-border lh-26">
+            <div class="pa10">
+                {{item.txt}}
+            </div> 
+        </div> 
+    </div>
+  {{#  }); }}
+  {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center mt-2">
+        <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+</script>
+<script>
+function GetAppNoticeGroup(){
+    $.ajax({
+        type : "get",
+        url : "https://piapi.rxjy.com/actionapi/JiGuang/GetAppNoticeGroup",
+        data : {
+            CardNo:getCookie('appCardNo'),
+            IsApp:5
+        },
+        success : function(result) {
+            var informationnavTpl = informationnavtpl.innerHTML
+            ,informationnav = document.getElementById('informationnav');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(informationnavTpl).render(result, function(html){
+                    informationnav.innerHTML = html;
+                    $('#informationnav a')[0].click()
+                });
+            })
+        },
+        error : function(e){
+            console.log(e.status);
+            console.log(e.responseText);
+        }
+    });
+};
+GetAppNoticeGroup();
+function getInfor(_this,groupid){
+    $("#informationnav a").removeClass("active");
+    _this.addClass("active");
+    getInforData(parseInt(groupid));
+};
+
+//获取分类下的数据
+function getInforData(groupId){
+    $.ajax({
+        type : "get",
+        url : "https://piapi.rxjy.com/actionapi/JiGuang/GetAppNoticeList",
+        data : {
+            CardNo:getCookie('appCardNo'),
+            group:groupId,
+            IsApp:5
+        },
+        success : function(result) {
+            console.log(result)
+            var getTpl = informationtpl.innerHTML
+            ,view = document.getElementById('informationbox');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                laytpl(getTpl).render(result, function(html){
+                view.innerHTML = html;
+                });
+            })
+        },
+        error : function(e){
+            console.log(e.status);
+            console.log(e.responseText);
+        }
+    });
+};
+</script>

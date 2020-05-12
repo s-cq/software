@@ -1,0 +1,500 @@
+
+<% layout('layoutSimple.ejs') -%>
+<div class="rxadmin-contentnav clearfix">
+    <span class="fz-18">订单详情</span>
+</div>
+<div id="fxDetail-render"></div>
+<script  id="demo" type="text/html">
+    <div class="cu-details">
+        <div  class="clearfix cu-panel__main cu-card ptb-6">
+          <div class="col-8 tx-center bor-dotted-right">
+            <p class="fz-16 mt-1 cLightGray">
+              <span>订单号&nbsp;:</span>
+              <span>{{getQueryString('orderCode')}}</span>
+            </p>
+            <p class="fz-18 fw-bold cLightRed mt20 mb20">
+              <span class="fw-bold">订单状态&nbsp;:</span>
+              <span class="fw-bold">{{(orderStageName(d.b.orderStage))}}</span>
+            </p>
+            <div>
+              <img class="bor-rad50 " src="{{getCookie('photo')}}"  width="85px" height="85px" alt="">
+              <p class="fz-18 fw-bold mt-3">{{getQueryString('proName')}}</p>
+            </div>
+          </div>
+          <div class="col-16 pl-1">
+            <div class="col-24">
+              <ul class="layui-timeline col-24 ">
+                {{#  layui.each(d.statusList, function(index, item){ }}
+                    <li class="clearfix">
+                        <div class="col-7 fz-12 lh-22 ">
+                            <span class="fr mr-2"> 
+                                {{#  if(item === '发起'){ }}
+                                    {{d.b.create_time==undefined?'':formateDate(d.b.create_time)}}
+                                {{#  } else if(item === '执行'){ }}
+                                    {{d.b.implementTime==undefined?'暂未执行':formateDate(d.b.implementTime)}}
+                                {{#  } else if(item === '验收'){  }}
+                                    {{d.b.acceptanceTime==undefined?'暂未验收':formateDate(d.b.acceptanceTime)}}
+                                {{#  } }}
+                            </span>
+                        </div>
+                        <ul class="col-17">
+                            <li class="layui-timeline-item">
+                                {{#  if(item === '发起'){ }}
+                                    <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                {{#  } else if (item === '执行'){ }}
+                                    {{#  if(Number(d.b.orderStage) === 1 || Number(d.b.orderStage) ===  2){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.b.orderStage)  >  2){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } else if (item === '验收'){ }}
+                                    {{#  if(Number(d.b.orderStage) === 3 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.b.orderStage) === 6){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } }}
+                                <div class="layui-timeline-content layui-text">
+                                    <h3 class="layui-timeline-title fz-14 fw-bold">{{item}}</h3>
+                                    <p class="fz-12">订单：
+                                        {{#  if(item === '发起'){ }}
+                                            {{getQueryString('orderCode')}}已于{{formateDate(d.b.create_time)}}发起
+                                        {{#  } else if (item === '执行'){ }}
+                                            {{getQueryString('orderCode')}}{{d.b.implementTime==undefined?'暂未执行':'已于'+formateDate(d.b.implementTime)+'执行完'}}
+                                        {{#  } else if (item === '验收'){ }}
+                                            {{getQueryString('orderCode')}}{{d.b.acceptanceTime==undefined?'暂未验收':'已于'+formateDate(d.b.acceptanceTime)+'验收完'}}
+                                        {{#  } }}
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                {{#  }); }}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="cu-card mt20">
+            <div class="cu-card__title">
+              <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                <span>发起</span>
+              </div>
+            </div>
+            <div class="mt20 clearfix">
+                {{#  layui.each(d.c, function(index, item){ }}
+                <div class=" viewer-images cu-details__inner-content relative fl mr10">
+                  <ul class="cu-upload-list fl  ">
+                    <li class="cu-upload-list__item">
+                        <img title="{{item.Content}}" class="cu-upload-list__item-thumbnail" src="{{item.PicturePath}}" width="85px" height="85px" alt="">
+                        <span class="cu-upload-list__item-name" title="{{item.Name}}">{{ellipsisText(item.Name,4)}}</span>
+                    </li>
+                  </ul>
+                </div>
+              {{#  }); }}
+            </div>
+          </div>
+        <div class="cu-card mt20">
+            <div class="cu-card__title">
+              <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                <span>执行</span>
+              </div>
+            </div>
+            <div class="clearfix mt10">
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th class="tx-center">标准图</th>
+                                <th class="tx-center">说明</th>
+                                <th class="tx-center">现场图</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#  layui.each(d.a, function(index, item){ }}
+                            <tr>
+                                <td width="10%">
+                                    <div class="col-10 pl-5 viewer-images">
+                                      <ul class="cu-upload-list fl  ">
+                                        <li class="cu-upload-list__item">
+                                            <img class="cu-upload-list__item-thumbnail" src="{{item.senceImg}}" width="100px" height="100px" alt="">
+                                            <span class="cu-upload-list__item-name" title="{{item.senceName}}">{{ellipsisText(item.senceName,4)}}</span>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                </td>
+                                <td width="50%"  class="tx-center ">
+                                    <p style="text-align: justify" class="lh-28">{{item.senceContent}}</p>
+                                </td>
+                                <td width="20%">
+                                    {{#  if(d.b.orderStage < 3){ }}
+                                        {{#  if(item.orderPhoto != '' && item.orderPhoto !== 'null'){ }}
+                                            <div class="col-10 xian{{item.id}} ml-3 mr-3 viewer-images">
+                                              <ul class="cu-upload-list fl  ">
+                                                <li class="cu-upload-list__item">
+                                                    <img class="cu-upload-list__item-thumbnail"  src="{{item.orderPhoto}}" width="100px" height="100px">
+                                                    <div class="cu-upload-list__item-actions">
+                                                      <span class="cu-upload-list__item-delete" onclick="deletePhotoByUid({{item.photoId}})"></span>
+                                                    </div>
+                                                </li>
+                                              </ul>
+                                            </div>
+                                        {{#  } }}
+                                        {{#  if(item.orderPhoto === '' || item.orderPhoto === 'null'){ }}
+                                            <!-- <div class="col-10  xian{{item.id}} ml-6">
+                                                <img  class="fr xcImg mr-4"  src="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/images/noimage.jpg" width="100px" height="100px" alt="">
+                                            </div> -->
+                                            <div class="col-10 xian{{item.id}} ml-3 mr-3 viewer-images">
+                                              <ul class="cu-upload-list fl  ">
+                                                <li class="cu-upload-list__item">
+                                                    <img class="cu-upload-list__item-thumbnail"  src="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/images/noimage.jpg" width="100px" height="100px">
+                                                </li>
+                                              </ul>
+                                            </div>
+                                        {{#  } }}
+                                            <div class="viewer-images relative  col-10" >
+                                                <div style="padding: 0;" class=" fr tx-center layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh"  width="100px" height="100px"  >
+                                                    <div class="cu-upload fl" style="width:100px;height:100px;">
+                                                        <span class="cu-upload__icon"></span>
+                                                        <input type="file" name="file" class="cu-upload__input file" id="{{item.id}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    {{#  } }}
+                                    {{#  if(d.b.orderStage > 2){ }}
+                                        <div class="col-18 pl-5 viewer-images xian{{item.id}}">
+                                          <ul class="cu-upload-list fr  ">
+                                            <li class="cu-upload-list__item">
+                                                <img class="cu-upload-list__item-thumbnail"  src="{{item.orderPhoto}}" width="100px" height="100px" alt="">
+                                            </li>
+                                          </ul>
+                                        </div>
+                                    {{#  } }}
+                                </td>
+                            </tr>
+                            {{#  }); }}
+                            {{#  if(d.a.length === 0){ }}
+                                <div class="tx-center">
+                                    <img width="500" src="/images/nodata.jpg" alt="">
+                                </div>
+                            {{#  } }} 
+                            {{#  if(d.b.orderStage == 1){ }}
+                            <tr> 
+                                <td colspan="3">
+                                    <div class="tx-center">
+                                        <button onclick='confirm("{{d.a.length}}")' class="layui-btn layui-btn-normal layui-btn-sm">确定</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{#  } }} 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="cu-card mt-20 ">
+            <div class="cu-card__title">
+                <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                <span>验收</span>
+                </div>
+            </div>
+            {{#  if(d.b.orderStage==6){ }}
+            <div class="clearfix mt10">
+              <!-- <div id="detail-star" class="ml10"></div> -->
+              <div class="ml10">
+                <p  class="col-8">
+                  <span class="fw-bold">验收结果：</span>
+                  <span class="{{d.b.acceptance_standard!=null?standardColor(d.b.acceptance_standard):''}}">{{d.b.acceptance_standard!=null?standard(d.b.acceptance_standard):''}}</span>
+                </p>
+                <p  class="col-8">
+                  <span class="fw-bold">验收人：</span>
+                  <span >{{d.b.acceptanceBy!=null?d.b.acceptanceBy:''}}</span>
+                </p>
+                <p  class="col-8">
+                  <span class="fw-bold">验收时间：</span>
+                  <span >{{d.b.create_time!=null?formateDate(d.b.create_time):'--'}}</span>
+                </p>
+                <p  class="col-24 mt-2">
+                  <span class="fw-bold">验收内容：</span>
+                  <span >{{d.b.acceptance_reamrk!=null?d.b.acceptance_reamrk:''}}</span>
+                </p>
+                {{#  if(d.e.length > 0){ }}
+                <div class="col-24 mt-2 clearfix">
+                  {{#  layui.each(d.e, function(indexE, itemE){ }}
+                  <!-- <div class="viewer-images relative fl mr-2 photoMent">
+                    <img src="{{itemE}}" width="85px" height="85px" alt="">
+                  </div> -->
+                  <div class="viewer-images  relative fl mr-2 ">
+                    <ul class="cu-upload-list fl  ">
+                      <li class="cu-upload-list__item">
+                        <img src="{{itemE}}" width="85px" height="85px" alt="">
+                      </li>
+                    </ul>
+                  </div>
+                  {{#  }); }}
+                </div>
+                {{#  } }}
+              </div>
+            </div>
+            {{#  } }}
+            {{#  if(d.b.orderStage != 6){ }}
+                <div class="tx-center">
+                    暂未验收
+                </div>
+            {{#  } }} 
+        </div>
+    </div>
+</script>
+<script>
+  var gsgapiUrl = 'https://gsgapi.rxjy.com'
+  var gpmUrl = 'https://gpm.rxjy.com'
+    var flg = false
+    var code = ""
+    var faqi = ""
+    var imgList = []
+    var YsimgList = []
+    var statusName = ['验收', '执行', '发起']
+    var orderNo = getCookie('proorderNo');//项目单号
+    if (getQueryString('orderName') === '放线') {
+        FXorder()//放线订单
+    }
+    //============== 放线订单详情开始
+    // 执行点击确定
+    function confirm(val) {
+      var arrXC=0
+      // 判断有没有待执行xcImg的图片
+      if ($(".xcImg").length != 0) {
+          for(var i=0; i<$(".xcImg").length; i++) {
+              if ($(".xcImg")[i].currentSrc!='https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/images/noimage.jpg' && $(".xcImg")[i].currentSrc != '') {
+                arrXC++
+              }
+          }
+          if(val!=arrXC) {
+              layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('现场图片暂未执行完');
+              }); 
+             return
+          }
+        }
+        var params = {
+            orderCode:code,// c9e2d8d7-d00d-48ee-85a2-610712c99522
+            createUserNo:getCookie('mobile'), //13910918850
+            createUserName:getCookie('userName') //李文仲
+        };
+        $.ajax({
+                type: 'post',
+                url: `${gsgapiUrl}/api/senceProtection/updateSenceProjectOrderStage`,
+                data: params,
+        }).done(result => {
+            if (result.StatusCode === 1) {
+                var params = {
+                    solutionNo:getQueryString('orderCode'),//,// c9e2d8d7-d00d-48ee-85a2-610712c99522
+                    stage:'3'
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: `${gpmUrl}/api/project/orderModel/updateOrderLayingStage`,
+                    data:JSON.stringify(params) ,
+                    contentType: "application/json; charset=utf-8",
+                }).done(results => {
+                    if (results.statusCode === 1) {
+                        location.reload()
+                    }
+                });
+            }else{
+                layer.msg(result.StatusMsg)
+            }
+        });
+    }
+    // 整改订单详情【二段】
+    function FXorder(params) {
+        $.ajax({
+            url: `${gpmUrl}/api/project/orderModel/findUserInfoBysolutionNo`,
+            type: 'GET',
+            data: {solutionNo:getQueryString('orderCode')},//订单编号
+            success: function (result) {
+                if (result.statusCode === 1) {
+                    // 获取code
+                    $.ajax({
+                        type: 'get',
+                        url: `${gpmUrl}/api/project/orderModel/findSenceData`,
+                        data: {
+                            orderNo:getQueryString('orderno')
+                        },
+                    }).done(resultCode => {
+                        code = resultCode.Body.code
+                        // 执行【三段】
+                        $.ajax({
+                                url: `${gsgapiUrl}//api/senceProtection/getSenceOrderStandardByOrderCode`,
+                                type: 'GET',
+                                data: {orderCode:code},//},//code订单号
+                                success: function (res) {
+                                    if (res.StatusCode === 1) {
+                                        // 发起图片
+                                        $.ajax({
+                                                url: `${gsgapiUrl}//api/senceProtection/getSenceData`,
+                                                type: 'GET',
+                                                data: {orderCode:code,workTypeCode:'15'},//},//code订单号
+                                                success: function (resFq) {
+                                                    imgList = []
+                                                    YsimgList = []
+                                                    if (result.Body.acceptancePhoto !==null && result.Body.acceptancePhoto !=='') {
+                                                      YsimgList =  (result.Body.acceptancePhoto).split(',')
+                                                    }
+                                                    console.log(YsimgList);
+                                                    
+                                                    for(var i=0; i<resFq.Body.length; i++) {
+                                                        if (resFq.Body[i].selectState!=0) {
+                                                             imgList.push(resFq.Body[i])
+                                                        }
+                                                    }
+                                                    imgList.sort(sortFun('Id'))
+                                                    res.Body.sort(sortFun('id'))
+                                                    var d={a:res.Body,b:result.Body,c:imgList,statusList: statusName,e:YsimgList}
+                                                    var getTpl = demo.innerHTML
+                                                    var view = document.getElementById('fxDetail-render');
+                                                    
+                                                    layui.use('laytpl', function(){
+                                                        var laytpl = layui.laytpl;
+                                                        laytpl(getTpl).render(d, function(html){
+                                                            view.innerHTML = html;
+                                                            viewer()
+                                                            uploadFunction()
+                                                        });
+                                                    })
+                                                    
+                                                    // 弹层和放大
+                                                    layui.use(['layer'], function(){
+                                                    var layer = layui.layer;
+                                                    layer.photos({
+                                                        photos: '.photoMent',
+                                                        anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                                                    }); 
+                                                }); 
+                                            }
+                                        })
+                                    
+                                    } else {
+                                        console.log('获取数据失败');
+                                    }
+                                }
+                            })
+                        });
+                } else {
+                    console.log('获取数据失败');
+                }
+            }
+        })
+    }
+   
+    // 上传图片回显
+    function uploadFunction(){
+        $(".file").each(function() {
+            uploads({
+                // 上传控件ID
+                id: $(this).attr("id"),
+                // 是否传多个文件
+                mutil: true,
+                // 上传文件类型
+                mime_types: [{
+                    title: "Image",
+                    extensions: "jpg,gif,png"
+                }],
+                // 上传成功后回调函数 servername 图片域名  filename图片地址 url 图片全地址 id 上传空间ID
+                callback: function(servername, filename, url, id) {
+                   $(`.xian${id} > img`).html(`<img class="cu-upload-list__item-thumbnail"  src="${url}" width="100px" height="100px">`)
+                    savePhotoByUid(url,$(this).attr("id"))
+                    FXorder()
+                }
+            })
+        })
+    }
+    // 保存图片
+    function savePhotoByUid(FileUrl,upid) {
+        const obj = {
+            orderCode:code,// c9e2d8d7-d00d-48ee-85a2-610712c99522
+            senceId:upid, //
+            sencePhoto:FileUrl, 
+            createUserNo:getCookie('mobile'), //13910918850
+            createUserName:getCookie('userName') //李文仲
+        };
+        $.ajax({
+            type: 'post',
+            url: `${gsgapiUrl}/api/senceProtection/saveSencePhoto`,
+            // https://gsgapi.rxjy.com/api/senceProtection/saveSencePhoto
+            data: obj,
+        }).done(result => {
+            if (result.StatusCode === 1) {
+                layer.msg('上传成功');
+            }
+        });
+    };
+    // 执行 阶段删除 图片
+    
+    function deletePhotoByUid(photoId) {
+        const obj = {
+          photoId:photoId
+        };
+        $.ajax({
+            type: 'post',
+            url: `${gpmUrl}/api/project/orderModel/updateSenceOrderPhoto`,
+            data: obj,
+        }).done(result => {
+            if (result.statusCode === 1) {
+              FXorder()
+                layer.msg('删除成功');
+            }
+        });
+    };
+    // 整改订单项目阶段转化
+    function orderStageName(stage){
+        switch (Number(stage)) { 
+            case 1:
+                return "执行中"
+            break; 
+            case 2: 
+                return "执行中"
+            break;
+            case 3: 
+                return "执行完成"
+            break;
+            case 6: 
+                return "验收完成"
+            break;
+        }
+    }
+    function standard(params) {
+      switch (Number(params)) {
+        case 1:
+          return '差'
+        case 2:
+          return '中'
+        case 3:
+          return '良'
+        case 4:
+          return '优'
+
+      }
+    }
+    function standardColor(params) {
+      switch (Number(params)) {
+        case 1:
+          return 'cRed'
+        case 2:
+          return 'cOrange'
+        case 3:
+          return 'cLightGreen'
+        case 4:
+          return 'cGreen'
+
+      }
+    }
+    //============== 放线订单详情结束
+</script>

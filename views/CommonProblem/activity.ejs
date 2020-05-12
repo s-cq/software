@@ -1,0 +1,92 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+        <i class="cu-card__line"></i>
+        <span class="">我的活动</span>
+    </div>
+  </div>
+  <div class="mt-2">
+    <ul class="rxadmin-contentnav clearfix pb-1" id="activityNav">
+        <li><a data-type="1" class="active" href="javascript:">全部</a></li>
+        <li><a data-type="2" href="javascript:">进行</a></li>
+        <li><a data-type="3" href="javascript:">待开</a></li>
+        <li><a data-type="4" href="javascript:">已结</a></li>
+    </ul>
+  </div>
+  <!-- 排行信息 -->
+  <div class="cu-card__main pt-0">
+    <div id="activity-render"></div>
+  </div>
+</div>
+<script>
+  // 获取排行信息
+  getRankingInfo()
+  function getRankingInfo(type){
+      // 根据获取到的id获取城 国 司数据
+      var params = {
+        acOpen: 1,
+        acDept: 5
+      }
+      if (type === 4) {
+        params.acOpen = 2
+      }
+      $.ajax({
+          type: "get",
+          url: "https://tedu.rxjy.com/a/rx/rxActivityInfo/getActivityHistoryList",
+          data: params,
+          success : function(result) {
+              var getTpl = document.getElementById('activity-template').innerHTML;
+              var view = document.getElementById('activity-render');
+              layui.use('laytpl', function(){
+                  var laytpl = layui.laytpl;
+                  laytpl(getTpl).render(result, function(html){
+                    view.innerHTML = html;
+                  });
+              })
+          },
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+  };
+  $(function(){
+      $("#activityNav a").click(function(){
+        getRankingInfo(parseInt($(this).attr("data-type")));
+        $("#activityNav a").removeClass("active");
+        $(this).addClass("active");
+      });
+  });
+  </script>
+<!-- 排行循环模板 -->
+<script id="activity-template" type="text/html">
+  <ul class="plr-1 pb-1  relative">
+  {{#  layui.each(d.body, function(index, item){ }}
+    <li class="cu-panel mt-2">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-8">
+          <img width="150px" height="120px" src="{{item.imgUrls}}">
+        </div>
+        <div class="cu-panel__split col-12">
+          <div class="col-24 tx-left">
+              <span class="cLightGray pr-1">活动主题</span>
+              <span>{{item.acName}}</span>
+          </div>
+          <div class="col-24 tx-left">
+              <span class="cLightGray pr-1">活动内容</span>
+              <span title="{{item.content}}">{{ellipsisText(item.content,80)}}</span>
+          </div>
+        </div>
+        <div class="cu-panel__split col-4">
+            <span class="{{item.days < 0 ? 'cRed' : 'cBlue'}}">{{item.days < 0 ? '活动已结束' : '活动进行中'}}</span>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if( d.statusCode === 0 || d.body.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>

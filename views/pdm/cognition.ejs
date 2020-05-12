@@ -1,0 +1,535 @@
+<div class="pj__left layui-form">
+    <%- include('pdmnav.ejs') %>
+        <div id="orderBox">
+        </div>
+        <div id="orderBoxMent">
+        </div>
+</div>
+<script id="ordertpl" type="text/html">
+    <!-- 一、信息 -->
+    <div class="cu-card">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">基础资料<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+           <div class="layui-form-item">
+              <div class="col-12">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                  <input type="text" name="orderName" autocomplete="off"  value="{{d.GetAppUserList.u_name}}" {{d.GetAppUserList.u_name !== undefined && d.GetAppUserList.u_name !== '' && d.GetAppUserList.u_name !== null ? 'disabled' : ''}} placeholder="请输入姓名" class="layui-input"/>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-block">
+                  <input type="text" name="orderPhone" autocomplete="off" {{d.GetAppUserList.phone !== undefined && d.GetAppUserList.phone !== '' && d.GetAppUserList.phone !== null ? 'disabled' : ''}}  placeholder="请输入电话" value="{{d.GetAppUserList.phone}}" class="layui-input"/>
+                </div>
+              </div>
+           </div>
+
+           <div class="layui-form-item">
+              <div class="col-12">
+                <label class="layui-form-label">微信</label>
+                <div class="layui-input-block">
+                  <input type="text" name="orderWX" autocomplete="off"  placeholder="请输入微信" value="{{d.GetAppUserList.weixin}}" {{d.GetAppUserList.weixin !== undefined && d.GetAppUserList.weixin !== '' && d.GetAppUserList.weixin !== null ? 'disabled' : ''}}  class="layui-input"/>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="layui-form-label">推荐人</label>
+                <div class="layui-input-block">
+                  <input type="text" name="orderRecommender"  value="{{d.InfoManage.referrer}}" {{d.InfoManage.referrer !== undefined && d.InfoManage.referrer !== '' && d.InfoManage.referrer !== null ? 'disabled' : ''}} autocomplete="off" placeholder="请输入推荐人" class="layui-input"/>
+                </div>
+              </div>
+           </div>
+          
+          <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                {{# if (d.GetAppUserList.sex == 0 || d.GetAppUserList.sex == '女') { }}
+                    <input type="radio" name="sex" value="1" title="男" disabled>
+                    <input type="radio" name="sex" value="0" title="女" checked disabled>
+                {{# } else if(d.GetAppUserList.sex == 1 || d.GetAppUserList.sex == '男') { }}
+                    <input type="radio" name="sex" value="1" title="男" checked disabled>
+                    <input type="radio" name="sex" value="0" title="女" disabled>
+                {{# } else { }}
+                    <input type="radio" name="sex" value="1" title="男" checked>
+                    <input type="radio" name="sex" value="0" title="女" >
+                {{# } }}
+            </div>
+          </div>
+          
+          <div class="layui-form-item">
+            <label class="layui-form-label">从事类型</label>
+            <div class="layui-input-block">
+              <input type="text" name="ordertype" value="{{d.InfoManage.workType}}" {{d.InfoManage.workType !== undefined && d.InfoManage.workType !== '' && d.InfoManage.workType !== null ? 'disabled' : ''}} autocomplete="off" placeholder="请输入类型" class="layui-input"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+        
+      </div>
+      <div class="tx-center mt-4">
+      </div>
+
+</script>
+<script id="ordertplMent" type="text/html">
+    <!-- 二、行业经验 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">行业经验<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+            <div class="layui-form-item">
+                <div class="col-12">
+                    <label class="layui-form-label">行业经验</label>
+                    <div class="layui-input-block">
+                      <div class="col-20"><input type="text" value="" name="orderExperience" autocomplete="off" placeholder="请输入行业经验" class="layui-input"></div>
+                      <span class="fl ml-2 lh-30">年</span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="layui-form-label">行业出身</label>
+                    <div class="layui-input-block">
+                      <select name="birthVlaue" lay-filter="birth" class="seBirth"> 
+                            {{#  layui.each(d.GetWorkJobList, function(index, item){ }}
+                                 <option value="{{item.Value}}">{{item.Key}}</option>
+                            {{#  }); }} 
+                    </select>
+                    </div>
+                  </div>
+            </div>
+        </div>
+      </div>
+        </div>
+      <!-- 三、地址 -->
+      <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">入职地区<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+          <div class="layui-form-item">
+            <label class="layui-form-label">地区</label>
+            <div class="layui-input-block">
+                <div class="col-10 mr10">
+                    <select name="provincecityVlaue" lay-filter="province"  class="provinceLerber" >
+                    {{#  layui.each(d.provinceListMent, function(index, item){ }}
+                          <option value="{{item.code}}">{{item.name}}</option>
+                    {{#  }); }}
+                    </select>
+                </div>
+                <div class="col-10">
+                    <select id="cityMentList" name="cityMentVlaue" class="cityLerber"  lay-filter="cityMent" lay-verify="required">
+                        {{#  layui.each(d.cityList, function(index, item){ }}
+                        <option value="{{item.rateCode}}">{{item.name}}</option>
+                       {{#  }); }}
+                    </select>
+                </div>
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">分司</label>
+            <div class="layui-input-block" >
+                <select name="regionValue" lay-filter="aihao" id="region" class="regionLerber">
+                    {{#  layui.each(d.regionList, function(index, item){ }}
+                    <option value="{{item.regionId}}">{{item.regionName}}</option>
+                    {{#  }); }}
+                </select>
+            </div>
+          </div>
+          <div class="tx-right">
+          </div>
+        </div>
+        
+      </div>
+        <div class="tx-center mt-4">
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save" lay-submit lay-filter="conditionBasics">保存</button>
+        </div>
+</script>
+<script>
+    layui.use(['form', 'upload'], function(){
+    var uid = getCookie('uid');
+    var http17 = 'https://papi.rxjy.com'
+    var http16 = 'https://piapi.rxjy.com'
+    var http18 = 'https://gxmrs.rxjy.com'
+    var form = layui.form;
+    var upload = layui.upload;
+    var id = 1
+    var provinceList = []
+    var cityList = []
+    var GetWorkJobList = []
+    var findStIdObj = {}
+    var GetAppUserList = {}
+    var InfoManage = {}
+    // 查询啊详情
+    findStIdByUid()
+  
+    //  工种
+    GetWorkJob()
+    // 查询 阶段
+    function findStIdByUid() {
+        $.ajax({
+          type: 'get',
+          url: http18 + '/api/ProjectRecruit/findStIdByUid',
+          data: { uid: uid },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            findStIdObj = result.Body;
+            GetAppUserInfo()
+          }
+        });
+    };
+    /**
+       * 查询行业经验
+       */
+    function selectPmUserInfoManage() {
+        const self = this;
+        $.ajax({
+          type: 'get',
+          url: http18 + '/api/ProjectRecruit/selectPmUserInfoManager',
+          data: { uid: uid },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            InfoManage = result.Body;
+            if (GetAppUserList.weixin.trim() == '') {
+                GetAppUserList.weixin = ''
+            }
+            var getTpl = ordertpl.innerHTML
+            ,view = document.getElementById('orderBox');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                var obj ={
+                    'InfoManage': InfoManage,
+                    'GetAppUserList': GetAppUserList,
+                    'findStIdObj': findStIdObj
+                }
+                laytpl(getTpl).render(obj, function(html){
+                view.innerHTML = html;
+                });
+            })
+              // 请求分司
+             GetRegionList()
+            form.render()
+          }
+        });
+      };
+    /**
+       * 查询详情信息
+       */
+    function GetAppUserInfo(){
+        $.ajax({
+          type: 'post',
+          url: http16 + '/actionapi/AppPreUser/GetAppUserInfo',
+          data: { post: '4', appid: findStIdObj.rsAppId },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            GetAppUserList = result.Body[0];
+            selectPmUserInfoManage()
+          }
+        });
+      };
+    /**
+       * 工种
+       */
+    function  GetWorkJob() {
+        const self = this;
+        $.ajax({
+            type: 'get',
+            url: 'https://gapi.rxjy.com/api/APPPM/GetWorkJob',
+            data: '',
+        }).done(result => {
+            if (result.StatusCode == 1) {
+            GetWorkJobList = result.Body;
+            }
+        });
+    };
+    // 请求省 
+    function province(params) {
+        $.ajax({
+            //请求方式
+            type : "get",
+            url : http17 + "/api/join/GetAreaList",
+            data: '',
+            success : function(result) {
+                provinceList = result
+                if (GetAppUserList.u_shengId !== '' && GetAppUserList.u_shengId !== undefined && GetAppUserList.u_shengId !== '') {
+                    if (GetAppUserList.u_shengId.trim() == '') {
+                        cityMethods(provinceList[0].code,2)
+                    } else {
+                        provinceList.forEach(item =>{
+                            if (item.aid == GetAppUserList.u_shengId) {
+                                cityMethods(item.code, 2)
+                            } else if (item.code == GetAppUserList.u_shengId) {
+                                cityMethods(item.code, 2)
+                            }
+                        })
+                    }
+                } else {
+                    cityMethods(provinceList[0].code, 1)
+                }
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+            }
+        });
+        
+    }
+    // 请求市
+    function cityMethods(code,index){
+        var obj = {
+            code: code
+        }
+        $.ajax({
+            //请求方式
+            type : "get",
+            url : http17 + "/api/join/GetAreaList",
+            data: {code},
+            success : function(result) {
+                cityList = result
+                if (index == 1) {
+                    let html = '';
+                    cityList.forEach(item => {
+                    html += `<option value="${item.rateCode}">${item.name}</option>`;
+                    });
+                    $('#cityMentList').html(html);
+                } else {
+                    var getTpl = ordertplMent.innerHTML
+                    ,view = document.getElementById('orderBoxMent');
+                    var objMent ={
+                        "regionList": regionList,
+                        "cityList": cityList,
+                        "provinceListMent": provinceList,
+                        'GetWorkJobList': GetWorkJobList,
+                        'findStIdObj': findStIdObj
+                    }
+                    layui.use('laytpl', function(){
+                        var laytpl = layui.laytpl;
+                        laytpl(getTpl).render(objMent, function(html){
+                        view.innerHTML = html;
+                        });
+                    })
+                    // 工种赋值
+                    var birathHtml = ''
+                    GetWorkJobList.forEach(item =>{
+                        if (InfoManage.self_job == item.Value ) {
+                            birathHtml += `<option value="${item.Value}" selected>${item.Key}</option>`
+                        } else {
+                            birathHtml += `<option value="${item.Value}" >${item.Key}</option>`
+                        }
+                    })
+                    if (InfoManage.self_job !== null && InfoManage.self_job !== undefined && InfoManage.self_job !== '') {
+                        $('.seBirth').attr('disabled', 'disabled')
+                    }
+                    $('.seBirth').html(birathHtml)
+                    // 省赋值
+                    var provinceHtml = ""
+                    provinceList.forEach(item =>{
+                        if (item.aid == GetAppUserList.u_shengId) {
+                            provinceHtml += `<option value="${item.code}" selected>${item.name}</option>`
+                        } else {
+                            provinceHtml += `<option value="${item.code}">${item.name}</option>`
+                        }
+                    })
+                    if (GetAppUserList.u_shengId.trim() !== '' && GetAppUserList.u_shengId.trim() !== undefined && GetAppUserList.u_shengId.trim() !== null) {
+                        $('.provinceLerber').attr('disabled', 'disabled')
+                    }
+                     $('.provinceLerber').html(provinceHtml)
+                     // 市 赋值
+                    var cityHtml = ""
+                    cityList.forEach(item => {
+                        if (item.aid == GetAppUserList.u_shiId) {
+                            cityHtml += `<option value="${item.rateCode}" selected>${item.name}</option>`
+                        } else {
+                            cityHtml += `<option value="${item.rateCode}">${item.name}</option>`
+                        }
+                    });
+                    if (GetAppUserList.u_shiId.trim() !== '' && GetAppUserList.u_shiId.trim() !== undefined && GetAppUserList.u_shiId.trim() !== null) {
+                        $('.cityLerber').attr('disabled', 'disabled')
+                    }
+                    $('.cityLerber').html(cityHtml)
+                    // 年限
+                    if (InfoManage.worker_year !== null && InfoManage.worker_year !== undefined && InfoManage.worker_year !== '') {
+                        $('.layui-input[name=orderExperience]').attr('disabled', 'disabled')
+                    }
+                    $('.layui-input[name=orderExperience]').val(InfoManage.worker_year)
+                    // 地区赋值
+                    var regionHtml = ''
+                    regionList.forEach(item =>{
+                        if (item.regionId == GetAppUserList.region_id) {
+                            regionHtml += `<option value="${item.regionId}" selected>${item.regionName}</option>`
+                        } else {
+                            regionHtml += `<option value="${item.regionId}">${item.regionName}</option>`
+                        }
+                    })
+                    if (GetAppUserList.region_id !== '' && GetAppUserList.region_id !== null && GetAppUserList.region_id !== undefined) {
+                        $('.regionLerber').attr('disabled', 'disabled')
+                    }
+                    $('.regionLerber').html(regionHtml)
+                }
+                form.render()
+                var basicInfo = {}
+                basicInfo.u_name = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('u_name') ? GetAppUserList.u_name.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.u_name : '--'
+                basicInfo.phone = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('phone') ? GetAppUserList.phone.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.phone : '--'
+                basicInfo.weixin = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('weixin') ? GetAppUserList.weixin.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.weixin : '--'
+                basicInfo.weixin = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('sex') ? GetAppUserList.sex.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.sex : '--'
+                basicInfo.workType = InfoManage !== null && InfoManage !== undefined && InfoManage.hasOwnProperty('workType') ? InfoManage.workType.replace(/(^\s*)/g, '') === '' ? '--' : InfoManage.workType : '--'
+                basicInfo.worker_year = InfoManage !== null && InfoManage !== undefined && InfoManage.hasOwnProperty('worker_year') ? InfoManage.worker_year  === '' ? '--' : InfoManage.worker_year : '--'
+                basicInfo.self_job = InfoManage !== null && InfoManage !== undefined && InfoManage.hasOwnProperty('self_job') ? InfoManage.self_job === '' ? '--' : InfoManage.self_job : '--'
+                basicInfo.u_shengId = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('u_shengId') ? GetAppUserList.u_shengId.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.u_shengId : '--'
+                basicInfo.u_shiId = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('u_shiId') ? GetAppUserList.u_shiId.replace(/(^\s*)/g, '') === '' ? '--' : GetAppUserList.u_shiId : '--'
+                basicInfo.region_id = GetAppUserList !== null && GetAppUserList !== undefined && GetAppUserList.hasOwnProperty('region_id') ? GetAppUserList.region_id === '' ? '--' : GetAppUserList.region_id : '--'
+                basicInfo.isPerfect = true
+                for (const key in basicInfo) {
+                    if (basicInfo[key] === '--' || basicInfo[key] === '') {
+                        basicInfo.isPerfect = false
+                    }
+                }
+                if (basicInfo.isPerfect) {
+                    $('.bind-save').addClass('dis-none')
+                }
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+            }
+        });
+    }
+     /**
+       * 分司
+       */
+    function GetRegionList() {
+        $.ajax({
+            type: 'get',
+          url: http16 + '/actionapi/apphome/GetRegionList',
+          data: '',
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            regionList = result.Body
+            province()
+          }
+        });
+      };
+    // 点击 保存
+    form.on('submit(conditionBasics)', function(data){
+        console.log(data.field)
+        var data = data.field
+        if (!(/^1[3456789]\d{9}$/.test(data.orderPhone))) {
+            layer.msg('手机号不正确');
+            return;
+        }
+        if (data.orderName == '' || data.orderName == null) {
+            layer.msg('姓名未填写');
+            return;
+        }
+        if (data.orderWX == '' || data.orderWX == null) {
+            layer.msg('微信未填写');
+            return;
+        }
+        if (data.ordertype == '' || data.ordertype == null) {
+            layer.msg('从事类型未填写');
+            return;
+        }
+        if (data.orderExperience == '' || data.orderExperience == null) {
+            layer.msg('行业经验未填写');
+            return;
+        }
+        let province = '';
+        // 获取 省名称
+        var provincecityVlaue = ''
+        provinceList.filter(item => {
+            if (item.code == data.provincecityVlaue) {
+              province = item.name;
+              provincecityVlaue = item.aid
+            }
+          });
+        var cityMentVlaue = ''
+        let city = '';
+        // 获取 市名称
+        cityList.filter(item => {
+            if (item.rateCode == data.cityMentVlaue) {
+              city = item.name;
+              cityMentVlaue = item.aid
+            } 
+        });
+        const objThree = {
+            u_name: data.orderName,
+            phone: data.orderPhone,
+            sex: data.sex,
+            post: '4',
+            weixin: data.orderWX,
+            u_isjingyan: data.orderExperience,
+            u_sheng: province,
+            u_shengId: provincecityVlaue,
+            u_shi: city,
+            u_shiId: cityMentVlaue,
+            app_id: findStIdObj.rsAppId,
+            region_id: data.regionValue,
+          };
+        const obj = {
+            uid: uid,
+            mobile: data.orderPhone,
+            userName:
+            data.orderName,
+            sex: data.sex,
+            u_name: data.orderRecommender,
+            weChat: data.orderWX,
+            workerYear: data.orderExperience,
+            channel: '',
+            dataSources: 0,
+            updateUser: '',
+            province,
+            city,
+            inductionArea: data.regionValue,
+            workerNumber: 0,
+            workType: data.ordertype,
+          };
+          const objTwo = {
+            uid: uid,
+            selfJob: data.birthVlaue,
+          };
+          
+          $.ajax({
+            type: 'post',
+            url: http18 + '/api/ProjectRecruit/updUserInfoNew',
+            data: obj,
+          }).done(result => {
+            if (result.StatusCode === 0) {
+              $.ajax({
+                type: 'post',
+                url: http18 + '/api/ProjectRecruit/updatePmUserInfoManager',
+                data: objTwo,
+              }).done(result => {
+                if (result.StatusCode === 0) {
+                  $.ajax({
+                    type: 'post',
+                    url: http16 +'/actionapi/AppPreUser/OperateAppUser',
+                    data: objThree,
+                  }).done(result => {
+                    if (result.StatusCode === 0) {
+                      layer.msg('保存成功');
+                      findStIdByUid()
+                    }
+                  });
+                }
+              });
+            }
+        });
+
+        
+    });
+    form.on('select(province)', function(data) {
+        cityMethods(data.value, 1)
+    });
+    form.render()
+   });
+</script>

@@ -1,0 +1,19 @@
+<% layout('layoutBase.ejs') -%>
+<script>
+    delCookie('uid')
+    delCookie('userName')
+    delCookie('userLevel')
+    delCookie('appCardNo')
+    delCookie('mobile')
+    delCookie('userType')
+    delCookie('isFreeze')
+    delCookie('isBlacklist')
+    delCookie('dqName')
+    delCookie('areaId')
+    delCookie('cityId')
+    delCookie('photo');
+    delCookie('loginType');
+    sessionStorage.removeItem('message')
+    sessionStorage.setItem('loginout', true)
+    window.location.href="/login"
+</script>

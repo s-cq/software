@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目经理个人中心</title>
+    <link rel="shortcut icon" href="/pm.ico" />
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/layui/2.5.6/css/layui.css">
+    <link rel="stylesheet" href=" https://3w.rxjy.com/statics/css/common.css">
+    <link rel="stylesheet" href="/css/rxadmin.css">
+    <link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/stylesheets/rxcu.css">
+    <!-- 页面单独样式 -->
+    <link rel="stylesheet" href="/css/myapp.css">
+
+    <script src="https://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/layui-src/dist/layui.js"></script>
+    <script>
+        var uid = getCookie('uid');
+    </script>
+</head>
+<body>
+<%- include('components/header.ejs') %>
+<%- include('components/tip.ejs') %>
+    <div class="rxadmin-warp">
+        <div class="rx-content clearfix">
+            <div class="rxadmin-nav fl">
+                <h2 class="nav-title">我的项目</h2>
+                <ul class="nav-list">
+                    <li><a href="/index?id=0">全部</a></li>
+                    <li><a href="/index?id=1">审计</a></li>
+                    <li><a href="/index?id=2">准备</a></li>
+                    <li><a href="/index?id=3">在施</a></li>
+                    <li><a href="/index?id=4">竣工</a></li>
+                    <li><a href="/index?id=5">完工</a></li>
+                    <li><a href="/index?id=6">历史</a></li>
+                </ul>
+                <h2 class="nav-title">我的订单</h2>
+                <ul class="nav-list">
+                    <li><a href="/order?id=999">全部</a></li>
+                    <li class="relative"><a href="/order?id=0">待办</a><span class="message-title">2</li>
+                    <li class="relative"><a href="/order?id=3">待收</a><span class="message-title">2</li>
+                    <li class="relative"><a href="/order?id=1">待验</a><span class="message-title">2</li>
+                    <li><a href="/order?id=2">历史</a></li>
+                </ul>
+                <h2 class="nav-title">我的款项</h2>
+                <ul class="nav-list">
+                    <li><a href="/Money/deposit">保证金</a></li>
+                    <li><a href="/Money/quality">质保金</a></li>
+                    <li><a href="">收款</a></li>
+                    <li><a href="">支款</a></li>
+                </ul>
+                <h2 class="nav-title">我的资料</h2>
+                <ul class="nav-list">
+                    <li><a href="/test2">资料</a></li>
+                </ul>
+            </div>
+            <div class="rxadmin-content fr">
+                <div class="clearfix">
+                    <%-body%>
+                    <%- include('components/right.ejs') %>
+                </div>
+            </div>
+        </div>
+    </div>
+<style>
+    .server-nav-type a { display: block;}
+</style>
+
+<script type="text/javascript">
+    getactive($(".rxadmin-nav a"),"active")
+</script>
+<script src="/js/plupload-2.3.6.full.min.js"></script>
+<script src="/js/upload.js"></script>
+
+</body>
+</html>

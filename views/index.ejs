@@ -1,0 +1,280 @@
+
+  <div class="pj__left">
+    <!-- <ul class="rxadmin-contentnav clearfix">
+      <li><a href="">人工</a></li>
+      <li><a href="">材料</a></li>
+      <li><a href="">质量</a></li>
+      <li><a href="">现场</a></li>
+      <li><a class="active" href="">管理</a></li>
+    </ul> -->
+
+    <div class="cu-card__main plr-1">
+        <div  class="cu-panel">
+            <div class="cu-panel__main is-not-border tx-center lh-26  pa10">
+                <p class="col-8 pr-8 tx-left">
+                  <span class="cLightGray pr-1">项目总数</span>
+                  <span class="projectNumber"></span>
+                </p>
+            </div>
+        </div>
+        <div class="cu-panel__title tx-center mt-2">
+            <p class="col-12">项目名称</p>
+            <p class="col-4">阶段</p>
+            <p class="col-4">操作</p>
+            <p class="col-4">消息</p>
+        </div>
+        <div id="view" class="pb-1"></div>
+    </div>
+    <div class="visit dis-none" id="visit">
+        <div id="visit-render"></div>
+        <div>
+            <span>正常</span> <span>异常</span> <span>问题</span>
+            <input type="text">
+        </div>
+    </div>
+  </div>
+  <script>
+    layui.use(['form'], function(){
+        if(getCookie("userName")===undefined || getCookie("userName")===null || getCookie("userName")===''){
+            window.location.href= 'login'
+        }
+        var list = {
+            uid:uid,
+            afterMarketState: getQueryString('id'),
+            constructionPeriod:'' ,
+            areaId: 39,
+            CityId:'' ,
+            searchNo: '',
+            industryValue:'' ,
+            logTypes: 22,
+            loginNo:'' ,
+            flag: 1
+        }
+        $.ajax({
+            //请求方式
+            type : "POST",
+            url : "https://gpm.rxjy.com/api/project/getProjectByUid",
+            data : list,
+            success : function(result) {
+                var projectNumber = 0;
+                $('.projectNumber').text(result.body.length)
+                var getTpl = demo.innerHTML;
+                var view = document.getElementById('view');
+                layui.use('laytpl', function(){
+                    var laytpl = layui.laytpl;
+                    laytpl(getTpl).render(result, function(html){
+                        view.innerHTML = html;
+                    });
+                })
+                getVisit()
+                // 获取回访数据
+                $('#view li .messageIcon').click(function() {
+                    // 点击查看拍照详情
+                    layer.open({
+                        type: 1,
+                        title: '回访消息',
+                        area: ['60%', '60%'],
+                        offset: 'c', //具体配置参考：offset参数项
+                        content: $('#visit'),
+                        btn: '确认',
+                        btnAlign: 'c', //按钮居中
+                        shade: 0.5, //不显示遮罩
+                        yes: function(){
+                            layer.closeAll();
+                        }
+                    });
+                })
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        // 获取回访的数据
+        function getVisit () {
+            $.ajax({
+                //请求方式
+                type : "GET",
+                url : "https://gpm.rxjy.com/api/project/findWorkTypeWorkLog",
+                data : {orderNo: '103-277'},
+                success : function(result) {
+                    console.log(result)
+                    var getTpl = document.getElementById('visit-template').innerHTML;
+                    var view = document.getElementById('visit-render');
+                    layui.use('laytpl', function(){
+                        var laytpl = layui.laytpl;
+                        laytpl(getTpl).render(result, function(html){
+                            view.innerHTML = html;
+                        });
+                    })
+                },
+                //请求失败，包含具体的错误信息
+                error : function(e){
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
+        };
+    })
+    // 回访角色数据
+    function roleType (i) {
+        var str
+        switch (Number(i)) {
+        case 1 :
+            str = '监理'
+            break
+        case 2 :
+            str = '集团客服'
+            break
+        case 3 :
+            str = '工程经理'
+            break
+        case 4:
+            str = '集团监理'
+            break
+        case 5:
+            str = '集团工程经理'
+            break
+        case 11:
+            str = '集团审计'
+            break
+        case 12:
+            str = '集团分审回访'
+            break
+        case 21:
+            str = '项目管理'
+            break
+        case 22:
+            str = '项目经理'
+            break
+        case 31:
+            str = '集团业务'
+            break
+        case 32:
+            str = '城业务'
+            break
+        case 33:
+            str = '地方业务'
+            break
+        case 41:
+            str = '集团工程财务'
+            break
+        case 42:
+            str = '地方工程主管'
+            break
+        case 43:
+            str = '地方投资会计'
+            break
+        case 51:
+            str = '集团工人联盟'
+            break
+        default:
+            str = ''
+            break
+        }
+        return str
+    };
+  </script>
+  <script>
+  function tfstage(stage){
+    switch (stage) { 
+      case 1:
+      return "审计"
+      break; 
+      case 2: 
+      return "准备"
+      break;
+      case 3: 
+      return "在施"
+      break;
+      case 4: 
+      return "竣工"
+      break;
+      case 5: 
+      return "完工"
+      break;
+      case 6: 
+      return "历史"
+      break;
+    }
+  }
+  </script>
+  <script id="demo" type="text/html">
+    <ul>
+    {{#  layui.each(d.body, function(index, item){ }}
+      <li class="cu-panel mt-4">
+        <div class="cu-panel__title">
+          <p class="fl">
+            <span class="cLightGray pr-1">项目合同号</span>
+            <span>{{item.contractNo}}</span>
+          </p>
+          <p class="fr">
+            <span class="cLightGray pr-1">应竣工日期</span>
+            <span>{{item.endDate}}</span>
+          </p>
+          <p class="fr pr-4">
+            <span class="cLightGray pr-1">开工日期</span>
+            <span>{{item.beginDate}}</span>
+        </p>
+        </div>
+        <div class="cu-panel__main is-not-border tx-center lh-26">
+            <div class="cu-panel__split col-12 tx-left">
+                <span> {{item.proname}}</span>
+            </div>
+            <div class="cu-panel__split col-4 tx-left">  
+                <span>{{tfstage(item.AfterMarketState)}}</span>
+            </div>
+            <div class="cu-panel__split col-4 fz-14">
+                <a onclick="setCookie('proorderNo','{{item.orderno}}')" class="cBlue" target="_blank" href="/project/index?orderno={{item.orderno}}">进入项目</a>
+            </div>
+            <div class="cu-panel__split col-4" title="点击查看集团消息">
+                <i class="layui-icon layui-icon-dialogue cRed fz-30 messageIcon" data-orderno="{{item.orderno}}"></i> 
+            </div>
+        </div>
+      </li>
+    {{#  }); }}
+    {{#  if(d.body.length === 0){ }}
+    <div class="tx-center mt-2">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+    {{#  } }}
+    </ul>
+  </script>
+  <script id="visit-template" type="text/html">
+    {{#  layui.each(d.Body, function(index, item){ }}
+        <div class="lh-24 plr-2">
+            {{#  if (item.logType===0 || item.logType===1 || item.logType===3) { }}
+                <div class="visi-list tx-left">
+
+                    <span class="visi-name">地</span>
+                    <p  class="visi-listtxt">{{item.content===''?'--':item.content}}</p>
+                </div>
+            {{#  }  else { }}
+                <div class="visi-list tx-right">
+                    <div class="visi-listtop">
+                        <span class="visi-name">集</span>
+                        <span class="visi-date">{{roleType(item.logType)}}</span>
+                        <span class="visi-date">{{item.creatorUserName === null ? '' : item.creatorUserName}}</span>
+                        <span class="visi-date">{{item.createTime}}</span>
+                        <span class="visi-date">{{item.exceptionContent}}</span>
+                    </div>
+                </div>
+                <p class="tx-right cBlue">{{item.content===''?'--':item.content}}</p>
+            {{#  } }}
+        </div>
+    {{#  }); }}
+    {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center mt-2">
+        <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+    {{#  } }}
+  </script>
+
+
+ 
+
+
+
+   
+

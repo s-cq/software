@@ -1,0 +1,96 @@
+<div id="messageId" class="dis-none">
+    <div id="message-render"></div>
+</div>
+<script>
+   layui.use(['form'], function(){
+        var messageKey = '' // 当前消息的Key
+        // 请求消息
+        $.ajax({
+          //请求方式
+            type: "get",
+            url:"https://gpm.rxjy.com/api/project/orderModel/findtSolutionNoticeByNo",
+            data: {uid:uid, top: 1},   
+            success: function(result) {
+               if (result.statusCode === 1 ) {
+                   if (result.Body.length > 0 && Number(result.Body[0].alreadyRead) === 0) {
+                        var messageTitle = sessionStorage.getItem('message')
+                        if (messageTitle === null) {
+                            messageTitle = 'true'
+                        }
+                        if (messageTitle === 'true') {
+                            messageKey = result.Body[0].F_KEY
+                            var getTpl = document.getElementById('message-template').innerHTML;
+                            var view = document.getElementById('message-render');
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                laytpl(getTpl).render(result, function(html){
+                                    view.innerHTML = html;
+                                });
+                                $('body').css('overflow', 'hidden')
+                                layer.open({
+                                    type: 1,
+                                    title: '消息提醒', //不显示标题栏
+                                    closeBtn: false,
+                                    area: '700px;',
+                                    shade: 0.8,
+                                    id: 'LAY_layuipro', //设定一个id，防止重复弹出
+                                    resize: false,
+                                    btn: ['取消', '确认'],
+                                    btnAlign: 'c',
+                                    moveType: 1, //拖拽模式，0或者1
+                                    content: $('#messageId'),
+                                    success: function(layero){
+                                        var btn = layero.find('.layui-layer-btn');
+                                        btn.find('.layui-layer-btn0').click(function() {
+                                            $('body').css('overflow', 'inherit')
+                                            layer.close();
+                                            sessionStorage.setItem('message', false)
+                                        });
+                                        btn.find('.layui-layer-btn1').click(function() {
+                                            // 调用已读的接口
+                                            $.ajax({
+                                                type:"post",
+                                                url:"https://gpm.rxjy.com/api//project/orderModel/updateSolutionNoticeByNo",
+                                                data:{key:messageKey},
+                                                success: function(results) {},
+                                                //请求失败，包含具体的错误信息
+                                                error : function(e){
+                                                    console.log(e.status);
+                                                    console.log(e.responseText);
+                                                }
+                                            });
+                                            $('body').css('overflow', 'inherit')
+                                            layer.close();
+                                            sessionStorage.setItem('message', false)
+                                        });
+                                    }
+                                });
+                            })
+                        }
+                    }
+               }
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+      });
+   })
+ 
+</script>
+<!-- 消息模板 -->
+<script id="message-template" type="text/html">
+    {{#  layui.each(d.Body, function(index, item){ }}
+    <div class="plr-8 ptb-4 fz-16">
+        <p class="col-24 ">
+            <span class="cLightGray pr-1">消息内容</span>
+            <span>{{item.reamrk}}</span>
+        </p>
+        <p class="col-24 mt-2">
+        <span class="cLightGray pr-1">时间</span>
+        <span>{{formateDate(item.createDate)}}</span>
+        </p>
+    </div>
+    {{#  }); }}
+  </script>

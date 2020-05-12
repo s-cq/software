@@ -1,0 +1,705 @@
+<div class="pj__left layui-form">
+    <%- include('pdmnav.ejs') %>
+    <div class="dis-none titleMent">
+        <h1>当前阶段未开启</h1>
+    </div>
+    <div class="dis-none titleCreted">
+        <div id="team"></div>
+    </div>
+</div> 
+<div id="payPressMent" class="dis-none">
+    <div class="tl-pay bind-stay">
+        <span onclick="clickMent(1)" class="layui-btn layui-btn-sm layui-btn-normal btn-one">扫码支付</span>
+        <span onclick="clickMent(2)" class="layui-btn layui-btn-sm layui-btn-primary btn-two">银行卡支付</span>
+    </div>
+    <div class="tl-pay bind-stay tl-pay-onde">
+        <div class="tl-pay-code">
+            <img class="bind-image" width="100%" height="100%" src="https://rxjyalipay.oss-cn-beijing.aliyuncs.com/test/JTT961911061713203.png" alt="">
+        </div>
+        <div class="fz-18 ptb-2">
+        <span>使用</span>
+        <span class="cBlue">支付宝</span>
+        <span>扫码支付</span>
+        </div>
+        <div>
+        <img width="100%" src="https://imgcdn.wenes.cn/ProjectBusiness/Images/15717345791T0EP3hYhcMfx6iX9yJ3dmjR.jpg" alt="">
+        </div>
+   </div>
+   <div class="tl-pay bind-stay tl-pay-twode dis-none">
+       银行卡号： 66666666666666
+   </div>
+</div>
+<script id='teamMent' type="text/html">
+    <!-- 一、个人照片-->
+    <div class="cu-card">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">个人照片<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+           <div class="layui-form-item">
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">一寸照片</label>
+                    <div class="layui-input-block" data-only='1'>
+                        <div class="cu-details__inner-upload">
+                            <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file" id="36" type="file" >
+                                <i class="layui-icon" style="color:#ccc;"></i>
+                                <p >点击上传</p>
+                            </div>
+                            <ul class="fl upload-list repair mt7 uploadImg36" >
+                                {{#  layui.each(d.photoAll, function(index, item){ }}
+                                {{#  if(item.attr_modelid == 36) { }}
+                                    <div class="viewer-images relative fl ml10">
+                                        <img data-group="" data-src="{{item.attrPhoto}}" src="{{item.attrPhoto}}" width="90px" height="90px" alt="">
+                                    </div>
+                                    {{#  } }}
+                                {{#  }); }}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 only-item">
+                    <label class="layui-form-label">艺术照片</label>
+                    <div class="layui-input-block" data-only='1'>
+                        <div class="cu-details__inner-upload">
+                                <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file" id="41" type="file">
+                                    <i class="layui-icon" style="color:#ccc;"></i>
+                                    <p >点击上传</p>
+                                </div>
+                            <ul class="fl upload-list repair mt7 uploadImg41" id="upload-only2">
+                                {{#  layui.each(d.photoAll, function(index, item){ }}
+                                {{#  if(item.attr_modelid == 41) { }}
+                                    <div class="viewer-images relative fl ml10">
+                                        <img data-group="" data-src="{{item.attrPhoto}}" src="{{item.attrPhoto}}" width="90px" height="90px" alt="">
+                                    </div>
+                                    {{#  } }}
+                                {{#  }); }}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+           </div>
+           <div class="tx-right  mt10">
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="conditionBank">保存</button>
+            <button type="button"  class="layui-btn layui-btn-sm  layui-btn-danger bind-edit ">编辑</button>
+        </div>
+          
+        </div>
+      </div>
+      <!-- 一、银行卡-->
+      <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">银行卡<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">开户行</label>
+            <div class="layui-input-block">
+                <select  name="bankThat"  lay-filter="relationship" id="bankOrderName">
+                    <option value="0" >-请选择-</option>
+                    <option value="建设银行">建设银行</option>
+                    <option value="农业银行">农业银行</option>
+                    <option value="工商银行">工商银行</option>
+                    <option value="中国银行">中国银行</option>
+                    <option value="光大银行">光大银行</option>
+                    <option value="广发银行">广发银行</option>
+                    <option value="浦发银行">浦发银行</option>
+                    <option value="北京银行">北京银行</option>
+                    <option value="民生银行">民生银行</option>
+                    <option value="招商银行">招商银行</option>
+                    <option value="交通银行">交通银行</option>
+                    <option value="华夏银行">华夏银行</option>
+                    <option value="兴业银行">兴业银行</option>
+                    <option value="中信银行">中信银行</option>
+                </select>
+            </div>
+            <div class="layui-input-block bankPressName dis-none lh-28" >
+                
+            </div>
+          </div>
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                 <input type="text" name="name" autocomplete="off" {{d.findStagInfo.userName !== undefined && d.findStagInfo.userName !== '' && d.findStagInfo.userName !== null ? 'disabled' : ''}}  value="{{d.findStagInfo.userName}}" placeholder="请输入姓名" class="layui-input"/>
+            </div>
+            <div class="layui-input-block dis-none lh-28" >
+                {{d.findStagInfo.userName}}
+            </div>
+          </div>
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">账号</label>
+            <div class="layui-input-block">
+                 <input type="text" name="bankAccount" autocomplete="off"  {{d.findStagInfo.bankAccount !== undefined && d.findStagInfo.bankAccount !== '' && d.findStagInfo.bankAccount !== null ? 'disabled' : ''}} value="{{d.findStagInfo.bankAccount}}" placeholder="请输入账号" class="layui-input"/>
+            </div>
+            <div class="layui-input-block dis-none lh-28" >
+                {{d.findStagInfo.bankAccount}}
+            </div>
+          </div>
+          <div class="col-12 only-item">
+            <label class="layui-form-label">银行卡正面</label>
+            <div class="layui-input-block" data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file dis-none" id="9" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg9" id="upload-only3">
+                        {{#  layui.each(d.photoAll, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 9) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.attrPhoto}}" src="{{item.attrPhoto}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+          <div class="col-12 only-item">
+            <label class="layui-form-label">银行卡反面</label>
+            <div class="layui-input-block" data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload ml10 mt7 preMnetWidh file dis-none" id="11" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg11" id="upload-only4">
+                        {{#  layui.each(d.photoAll, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 11) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.attrPhoto}}" src="{{item.attrPhoto}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+            
+        </div>
+        <div class="tx-right  mt10 layui-form-item">
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="conditionBank">保存</button>
+            <button type="button"  class="layui-btn layui-btn-sm  layui-btn-danger bind-edit bank-only">编辑</button>
+        </div>
+      </div>
+
+      <!-- 合同 -->
+      <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">合同<span class="cRed">（必填）</span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+            
+            <div class="layui-form-item mb10 only-item">
+            <label class="layui-form-label">平台协议</label>
+            <div class="layui-input-block " data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload agreement ml10 mt7  file dis-none" id="17" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg17"  >
+                        {{#  layui.each(d.photoPrss, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 17) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.attr_server_url + item.attr_file_url}}" src="{{item.attr_server_url + item.attr_file_url}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+          <div class="layui-form-item mb10 only-item">
+            <label class="layui-form-label">质量协议</label>
+            <div class="layui-input-block" data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload agreement ml10 mt7 file dis-none" id="23" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg23"  >
+                        {{#  layui.each(d.photoPrss, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 23) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.attr_server_url + item.attr_file_url}}" src="{{item.attr_server_url + item.attr_file_url}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">安全协议</label>
+            <div class="layui-input-block" data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload agreement ml10 mt7  file dis-none" id="24" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg24"  >
+                        {{#  layui.each(d.photoPrss, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 24) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img data-group="" data-src="{{item.attr_server_url + item.attr_file_url}}" src="{{item.attr_server_url + item.attr_file_url}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+          <div class="layui-form-item only-item">
+            <label class="layui-form-label">合作协议</label>
+            <div class="layui-input-block" data-only='1'>
+                <div class="cu-details__inner-upload">
+                    <div class="fl mr-4 layui-upload-drag bind-upload order-upload agreement ml10 mt7  file dis-none" id="25" type="file" >
+                        <i class="layui-icon" style="color:#ccc;"></i>
+                        <p >点击上传</p>
+                    </div>
+                    <ul class="fl upload-list repair mt7 uploadImg25"  >
+                        {{#  layui.each(d.photoPrss, function(index, item){ }}
+                            {{#  if(item.attr_modelid == 25) { }}
+                                <div class="viewer-images relative fl ml10">
+                                    <img src="{{item.attr_server_url + item.attr_file_url}}"  lay-src="{{item.attr_server_url + item.attr_file_url}}" width="90px" height="90px" alt="">
+                                </div>
+                             {{#  } }}
+                        {{#  }); }}
+                    </ul>
+                </div>
+            </div>
+          </div>
+          <div class="tx-right layui-form-item mt10">
+            <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save dis-none" lay-submit lay-filter="conditiotype">保存</button>
+            <button type="button"  class="layui-btn layui-btn-sm  layui-btn-danger bind-edit">编辑</button>
+          </div>
+        </div>
+      </div>
+      <div class="tx-center mt-4">
+      </div>
+
+      <!-- 一、款项-->
+      <div class="cu-card mt-4">
+        <div class="cu-card__title">
+          <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+            <span class="">款项<span class="cRed"></span></span>
+          </div>
+        </div>
+        <div class="cu-card__main is-not-hidden">
+          <div class="layui-form-item">
+            <label class="layui-form-label">款项</label>
+            <div class="layui-input-block">
+                
+            </div>
+          </div>
+          <div class="tx-right">
+                <button type="button"  class="layui-btn layui-btn-sm layui-btn-normal bind-save" lay-submit lay-filter="payment">去付款</button>
+          </div>
+        </div>
+      </div>
+</script>
+<style>
+    .order-upload{
+        width: 60px;
+        height: 60px;
+        padding: 15px;
+    }
+    .tl-pay {
+        position: relative;
+        width: 350px;
+        height: auto;
+        margin: 0 auto;
+        background: #ffffff;
+        text-align: center;
+        padding: 20px 10px;
+        margin-top: 20px;
+    }
+  .tl-pay-code {
+      width: 270px;
+      margin: 0px auto;
+      height: 270px;
+      border: 7px solid rgb(1, 141, 226);
+      border-radius: 23px;
+      position: relative;
+      overflow: hidden;
+  }
+  .fl{
+      float: left !important;
+  }
+  .tl-pay-mark {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    line-height: 270px;
+    color: #ffffff;
+    text-align: center;
+    font-size: 14px;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.5);
+    top: 0px;
+    left: 0px;
+    cursor: pointer;
+  }
+
+</style>
+
+<script>
+     var data = {}
+    layui.use(['form', 'upload'], function(){
+    var form = layui.form;
+    var upload = layui.upload;
+    var uid = getCookie('uid');
+    var http18 = 'https://gxmrs.rxjy.com'
+    var photoAll = []
+    var findStagInfo = {}
+    findStagInfoById()
+    function findStagInfoById(){
+        $.ajax({
+            type: 'get',
+            url: http18 + '/api/ProjectManager/findStageInfoById',
+            data: { uid: uid },
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                findStagInfo = result.Body
+                getAgreementPhoto()
+            }
+        });
+    };
+    
+    var photoPrss = []
+    function getAgreementPhoto() {
+        $.ajax({
+            type: 'get',
+            url: http18 + '/api/ProjectManager/getAgreementPhoto',
+            data: { uid: uid },
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                photoPrss= result.Body
+                getUserPhotoList()
+            }
+        });
+        
+    }
+    function getUserPhotoList(){
+        $.ajax({
+          type: 'get',
+          url: http18 + '/api/ProjectManager/getUserPhotoList',
+          data: {uid: uid},
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              photoAll = result.Body
+              if (findStagInfo.userName == undefined || findStagInfo.userName == null) {
+                findStagInfo.userName = ''
+              }
+              if (findStagInfo.bankAccount == undefined || findStagInfo.bankAccount == null) {
+                findStagInfo.bankAccount = ''
+              }
+            //  团队
+            var getTpl = teamMent.innerHTML
+            ,view = document.getElementById('team');
+            layui.use('laytpl', function(){
+                var laytpl = layui.laytpl;
+                var obj ={
+                    'photoAll': photoAll,
+                    'findStagInfo': findStagInfo,
+                    'photoPrss': photoPrss
+                }
+                laytpl(getTpl).render(obj, function(html){
+                view.innerHTML = html;
+                });
+            })
+            layer.photos({
+                photos: '.viewer-images'
+                ,anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+            var bankHtml = ''
+            var bankOrdeMnet = [{name: '建设银行'},{name: '工商银行'},{name: '农业银行'},{name: '中国银行'},{name: '光大银行'},{name: '广发银行'},{name: '浦发银行'},{name: '北京银行'},{name: '民生银行'},{name: '招商银行'},{name: '交通银行'},{name: '华夏银行'},{name: '中信银行'},]
+            bankOrdeMnet.forEach(item =>{
+                if (item.name == findStagInfo.bankName) {
+                    bankHtml += `<option value="${item.name}" selected ="">${item.name}</option>`
+                    $('.bankPressName').html(item.name)
+                } else {
+                    bankHtml += `<option value="${item.name}">${item.name}</option>`
+                }
+            })
+            if (findStagInfo.bankName !== null && findStagInfo.bankName !== undefined && findStagInfo.bankName !== '') {
+                $('#bankOrderName').attr('disabled', 'disabled')
+            }
+            $('#bankOrderName').html(bankHtml)
+            if (findStagInfo.st_id >= 4) {
+                $('.titleCreted').removeClass('dis-none')
+            } else {
+                $('.titleMent').removeClass('dis-none')
+            }
+            form.render()
+
+            // 点击编辑
+            $('.bind-edit').click(function (){
+                $(this).addClass('dis-none').siblings().removeClass('dis-none')
+                $(this).parent().parent().find('.only-item').each(function() {
+                        $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).show()
+                        $(this).find('.layui-input-block').eq(0).removeClass('dis-none').siblings().eq(1).addClass('dis-none');
+                });
+            })
+            // 点击保存
+            $('.bind-save').click(function (){
+                $(this).addClass('dis-none').siblings().removeClass('dis-none')
+                $(this).parent().parent().find('.only-item').each(function() {
+                    if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                        $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).hide()
+                    } else {
+                        $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+                    }
+                });
+            })
+            // 图片渲染 判断 上传按钮是否 显示
+            photoPrss.forEach(item =>{
+                $('.only-item').find('.agreement').each(function () {
+                    var id = $(this).eq(0).attr('id')
+                    if (item.attr_modelid == id) {
+                            if (id !== 36 && id !== 41) {
+                                $(this).addClass('order-none')
+                            }
+                        }
+                })
+            })
+            var bankIndex = 0
+            photoAll.forEach(item =>{
+                $('.only-item').find('.preMnetWidh').each(function () {
+                    var id = $(this).eq(0).attr('id')
+                        if (item.attr_modelid == id) {
+                            if (id == 36 && id == 41) {
+                                $(this).addClass('order-none')
+                            }
+                        }
+                   
+                })
+                if (item.attr_modelid == 9) {
+                    bankIndex = bankIndex + 1
+                } else if (item.attr_modelid == 11) {
+                    bankIndex = bankIndex + 1
+                }
+            })
+            // 判断银行卡 编辑 显示
+            // 银行卡信息
+            var basicInfo = {}
+            basicInfo.userName = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('userName') ? findStagInfo.userName.replace(/(^\s*)/g, '') === '' ? '--' : findStagInfo.userName : '--'
+            basicInfo.bankAccount = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('bankAccount') ? findStagInfo.bankAccount.replace(/(^\s*)/g, '') === '' ? '--' : findStagInfo.bankAccount : '--'
+            basicInfo.bankName = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('bankName') ? findStagInfo.bankName.replace(/(^\s*)/g, '') === '' ? '--' : findStagInfo.bankName : '--'
+            basicInfo.isPerfect = true
+            for (const key in basicInfo) {
+                if (basicInfo[key] === '--' || basicInfo[key] === '') {
+                    basicInfo.isPerfect = false
+                }
+            }
+            if (basicInfo.isPerfect && bankIndex == 2) {
+                $('.bank-only').addClass('dis-none')
+            }
+
+            // if (findStagInfo.st_id > 4) {
+            //     $('.layui-input').attr('disabled', 'disabled');
+            //     $('#tigatePressMent').attr('disabled', 'disabled');
+            //     $('#bankOrderName').attr('disabled', 'disabled');
+            // }
+
+            // 查询 入驻
+            selectPmUserInfoManager()
+             //图片上传方法调用
+             uploadFunction()
+          }  
+        });
+    };
+    
+    // 银行卡 保存
+    form.on('submit(conditionBank)', function(data){
+        var data = data.field
+        if (data.bankThat == '') {
+            layer.msg('开户行未填写')
+            return
+        }
+        if (data.name == '') {
+            layer.msg('银行卡姓名未填写')
+            return
+        }
+        if (data.bankAccount == '') {
+            layer.msg('银行卡账号未填写')
+            return
+        }
+        var obj = {
+            uid: uid,
+            bankOpen: data.bankThat,
+            bankName: data.name,
+            bankAccount: data.bankAccount
+        }
+        $.ajax({
+          type: 'post',
+          url: http18 + '/api/stageInfo/updateStageInfoByleId',
+          data: obj,
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              layer.msg('保存完成')
+          }  
+        });
+
+    })
+    
+    function selectPmUserInfoManager(){
+        $.ajax({
+          type: 'get',
+          url: http18 + '/api/ProjectRecruit/selectPmUserInfoManager',
+          data: {uid: uid},
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              var userSatte = result.Body.user_join_state
+            
+              // 银行卡信息
+                var joinIndex = 0
+                photoPrss.forEach(item =>{
+                    if (item.attr_modelid == 17) {
+                        joinIndex = joinIndex + 1
+                    } else if (item.attr_modelid == 23) {
+                        joinIndex = joinIndex + 1
+                    } else if (item.attr_modelid == 24) {
+                        joinIndex = joinIndex + 1
+                    } else if (item.attr_modelid == 25) {
+                        joinIndex = joinIndex + 1
+                    }
+                })
+                if (joinIndex == 4 && userSatte !== null && userSatte !== undefined && userSatte !== '') {
+                    $('.bank-only').addClass('dis-none')
+                }
+              form.render()
+          }  
+        });
+
+        $('.only-item').each(function() {
+            if ($(this).find('.layui-input-block').eq(0).attr('data-only') == 1) {
+                $(this).find('.layui-input-block').eq(0).find('.bind-upload').eq(0).hide()
+            } else {
+                $(this).find('.layui-input-block').eq(0).addClass('dis-none').siblings().removeClass('dis-none');
+            }
+        });
+
+    };
+   
+    // 银去付款
+    form.on('submit(payment)', function(){
+        layer.open({
+            title: '支付',
+            type: 1,
+            area: [ '700px', '650px' ],
+            content: $('#payPressMent'),
+        });
+    })
+
+    // 保存类型
+    form.on('submit(conditiotype)', function(data){
+        var obj = {
+            uid: uid,
+            userJoinState: data.field.tigateType,
+        }
+        $.ajax({
+          type: 'post',
+          url: http18 + '/api/ProjectRecruit/updateJoinPmUserInfoPJoinType',
+          data: obj,
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              layer.msg('保存完成')
+          }  
+        });
+        
+    })
+    /**
+       * 身份证照片 学历 证件上传
+       */
+    function savePhotoByUid(attrModelid, FileUrl) {
+        const obj = {
+          uid: uid,
+          attrModelid,
+          userType: 1,
+          attrServerUrl: '',
+          attrFileUrl: FileUrl,
+        };
+        $.ajax({
+          type: 'post',
+          url: http18 + '/a/api/person/savePhotoByUid',
+          data: obj,
+        }).done(result => {
+          if (result.StatusCode === 0) {
+              var html =''
+              html = `<div class="viewer-images relative fl ml10">
+                        <img data-group="" data-src="${FileUrl}" src="${FileUrl}" lay-src="${FileUrl}" width="90px" height="90px" alt="">
+                    </div>`
+            
+             $('.uploadImg' + attrModelid).html(html)
+             layer.photos({
+                photos: '.viewer-images'
+                ,anim: 0 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+            form.render()
+            layer.msg('上传成功');
+          }
+        });
+      };
+    function uploadFunction(){
+        $(".file").each(function() {
+            uploads({
+                // 上传控件ID
+                id: $(this).attr("id"),
+                // 是否传多个文件
+                mutil: true,
+                // 上传文件类型
+                mime_types: [{
+                    title: "Image",
+                    extensions: "jpg,gif,png"
+                }],
+                // 上传成功后回调函数 servername 图片域名  filename图片地址 url 图片全地址 id 上传空间ID
+                callback: function(servername, filename, url, id) {
+                    savePhotoByUid(id,url )
+                }
+            })
+            })  
+    }
+   });
+   function clickMent(index) {
+      if (index == 1) {
+        $('.tl-pay-onde').removeClass('dis-none')
+        $('.tl-pay-twode').addClass('dis-none')
+        $('.btn-one').addClass('layui-btn-normal').removeClass('layui-btn-primary')
+        $('.btn-two').addClass('layui-btn-primary').removeClass('layui-btn-normal')
+        
+      } else if (index == 2) {
+        $('.tl-pay-onde').addClass('dis-none')
+        $('.tl-pay-twode').removeClass('dis-none')
+        $('.btn-two').addClass('layui-btn-normal').removeClass('layui-btn-primary')
+        $('.btn-one').addClass('layui-btn-primary').removeClass('layui-btn-normal')
+      }
+       
+   }
+
+
+
+</script>
+<style>
+    .dis-none{
+        display: none;
+    }
+    .viewer-images{
+        z-index: 1000;
+    }
+    .order-none{
+        display: none !important;
+    }
+</style>

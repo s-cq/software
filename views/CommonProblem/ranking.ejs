@@ -1,0 +1,102 @@
+<div class="pj__left">
+  <div class="cu-card__title">
+    <div class="cu-card__inner">
+        <i class="cu-card__line"></i>
+        <span class="">我的排行</span>
+    </div>
+  </div>
+  <div class="mt-2">
+    <ul class="rxadmin-contentnav clearfix pb-1" id="rankingNav">
+        <li><a data-type="1" class="active" href="javascript:">国榜</a></li>
+        <li><a data-type="2" href="javascript:">城榜</a></li>
+        <li><a data-type="3" href="javascript:">司榜</a></li>
+    </ul>
+  </div>
+  <!-- 排行信息 -->
+  <div class="cu-card__main pt-0">
+    <div id="ranking-render"></div>
+  </div>
+</div>
+<script>
+  // 获取排行信息
+  getRankingInfo()
+  function getRankingInfo(type){
+      // 根据获取到的id获取城 国 司数据
+      var params = {
+        typeId: 1
+      }
+      if (type === 2) {
+        // 假如入职地区是11的话，city=1，杨斌提供的接口
+        if (getCookie('cityId') === 11) {
+          params.cityId = 1
+        } else {
+          params.cityId = getCookie('cityId')
+        }
+      } else if (type === 3) {
+          params.companyId =  getCookie('areaId')
+      }
+      $.ajax({
+          type: "get",
+          url: "https://gwbrs.rxjy.com/a/visit/surprvisorWorkLog/selectAllAppraiseTip",
+          data: params,
+          success : function(result) {
+              var getTpl = document.getElementById('ranking-template').innerHTML;
+              var view = document.getElementById('ranking-render');
+              layui.use('laytpl', function(){
+                  var laytpl = layui.laytpl;
+                  laytpl(getTpl).render(result, function(html){
+                    view.innerHTML = html;
+                  });
+              })
+          },
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+  };
+  $(function(){
+      $("#rankingNav a").click(function(){
+        getRankingInfo(parseInt($(this).attr("data-type")));
+        $("#rankingNav a").removeClass("active");
+        $(this).addClass("active");
+      });
+  });
+  </script>
+<!-- 排行循环模板 -->
+<script id="ranking-template" type="text/html">
+  <ul class="plr-1 pb-1  relative">
+  {{#  layui.each(d, function(index, item){ }}
+    <li class="cu-panel {{Number(item.uid) === Number(uid) && index !== 0 ? 'meRanking' : Number(item.uid) === Number(uid) && index !== 0 ? '' : index !== 0 ? 'mt-2' : 'otherRanking'}}">
+      <div class="cu-panel__main is-not-border tx-center lh-26">
+        <div class="cu-panel__split col-4">
+          <img width="85px" height="85px" src="{{item.personImg === null ? '/images/noPerson.png' : item.image}}">
+        </div>
+        <div class="cu-panel__split col-20">
+          <div class="col-6 tx-left">
+              <span class="cLightGray pr-1">姓名</span>
+              <span>{{item.user_name}}</span>
+          </div>
+          <div class="col-6 tx-left">
+              <span class="cLightGray pr-1">地区</span>
+              <span>{{item.cityName}}</span>
+          </div>
+          <div class="col-6 tx-left">
+              <span class="cLightGray pr-1">竣工金额</span>
+              <span class="cRed">{{toFixed(item.countMoney / 10000,2)}}万</span>
+          </div>
+          <div class="col-6 tx-left">
+              <span class="cLightGray pr-1">排名</span>
+              <span>第{{index + 1}}名</span>
+          </div>
+        </div>
+      </div>
+    </li>
+  {{#  }); }}
+  {{#  if(d.length === 0){ }}
+    <div class="tx-center">
+      <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>

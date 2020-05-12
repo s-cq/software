@@ -1,0 +1,268 @@
+<% layout('layoutBase.ejs') -%>
+<!-- <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="renderer" content="webkit">
+    <title>项目中心</title>
+    <link rel="stylesheet" href="https://3w.rxjy.com/statics/css/common.css">
+    <link rel="stylesheet" href="https://3w.rxjy.com/statics/css/loginPage.css">
+</head> -->
+<link rel="stylesheet" href="https://3w.rxjy.com/statics/css/common.css">
+<link rel="stylesheet" href="/css/rxadmin.css">
+<link rel="stylesheet" href="https://lib.rxjy.com/ajax/libs/rxjy@rxcu/1.0.0/stylesheets/rxcu.css">
+<link rel="stylesheet" href="https://3w.rxjy.com/statics/css/loginPage.css">
+<link rel="stylesheet" href="/css/myapp.css">
+<body class="layui-form">
+  <!-- <div class="rx-header-center-con clearfix">
+      <a href="" class="fl">
+          <img src="https://www.rxjy.com/statics/images/common/rx_logo.png" alt="">
+      </a>
+      <div class="login-logoRight fk">欢迎登陆</div>
+  </div> -->
+  <div id="app" class="clearfix container">
+      <!--内容区 start-->
+      <div class="cu-layout clearfix">
+          <div class="loginbox clearfix">
+          <div class="loginleft fl">
+              <h3 class="pt-4 tx-center mb-8">找工人、找材料、订单化系统</h3>
+              <p class="textButton">控成本<span class="plr-2">•</span>管质量</p>
+          </div>
+          <div class="loginright fr" id="render-login">
+              <div class="login-nav">
+                  <ul class="clearfix">
+                      <li class="current">账号登录<div class="login-nav-line"></div></li>
+                      <li>扫码登陆<div class="login-nav-line"></div></li>
+                  </ul>
+              </div>
+              <div class="login-tab">
+                  <!--账号登录-->
+                  <div class="login-tab-item mt-6">
+                      <input type="text" class="login-input mb-6" value="" name="phone" placeholder="手机号" />
+                      <input type="password" class="login-input mb-6" placeholder="密码" name="password"/>
+                      <!-- <div class="clearfix login-check mb20">
+                          <label class="fl"><input type="checkbox" class="login-check-input"/><span class="login-check-text">下次自动登陆</span></label>
+                          <a href="javascript:;" class="fr login-forget">忘记密码？</a>
+                      </div> -->
+                      <input type="button" lay-submit lay-filter="loginPressWord" name="loginPressWord" value="立即登陆" class="login-btn"/>
+                      <!-- <div class="register-tip1">没有账号？快速<a href="${ctx}/public/login/logging" class="register-btn">注册</a></div> -->
+                  </div>
+                  <!--扫码登陆-->
+                  <div class="login-tab-item dis-none">
+                      <div>
+                        <p class="tx-center lh-26">
+                            <strong>瑞祥项目经理客户端</strong> 手机版扫码登录
+                        </p>
+                        <p class="tx-center lh-26">官方APP更安全</p>
+                      </div>
+                      <div class="login-qr-code mt-2 relative">
+                          <img src="${ctxStatic}/images/common/header_app_QR2.jpg" alt="" class="login-qr-code-img">
+                          <div class="appCodeRefresh dis-none" onclick="getCode()">
+                              <div class="appCode-mask"></div>
+                              <div class="appCode-wrap">
+                                  <p> 二维码已失效<br/>请点击刷新</p>
+                              </div>
+                          </div>
+                      </div>
+                      <!-- <div class="register-tip2">请使用客户端扫描二维码登陆</div>
+                      <div class="register-tip1">没有账号？快速<a href="${ctx}/public/login/logging" class="register-btn">注册</a></div> -->
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+  </div>
+<script src="https://3w.rxjy.com/statics/js/common.js"></script>
+<script>
+    layui.use(['form'], function(){
+        // 先清除登陆方式
+        delCookie('loginType');
+        var groupTimes = '' // 大院的定时
+        var times = '' // 全局的定时 二维码
+        var clpurl = 'https://gpm.rxjy.com/api/' // 'http://10.10.8.162:6315/' // 'https://gpm.rxjy.com/api/'
+        var form = layui.form;
+        // tab切换
+        $('#render-login .login-nav li').click(function() {
+          var index = $(this).index();
+          $(this).addClass('current').siblings().removeClass('current')
+          $("#render-login .login-tab-item").eq(index).removeClass("dis-none").siblings().addClass(" dis-none");
+          if (index === 1) {
+              // 获取二维码
+              getCode()
+          } else {
+            codeOvertime(times)
+          }
+        })
+        // 免登陆 
+        avoidLogin()
+        if (sessionStorage.getItem('loginout') === null) {
+            getGroupLoginStatus()
+        } 
+        // 手机号码登陆
+        form.on('submit(loginPressWord)', function(data){
+            var username =data.field.phone
+            var userpwd = data.field.password
+            var _this = this
+            // 验证手机号、密码 登陆
+            $.ajax({
+                url: 'https://piapi.rxjy.com/actionapi/AppLogin/Login',
+                type: 'POST',
+                dataType: 'json',
+                data: { cardNo: username, password: userpwd, appId: 5, isPc: 1, isLogin: 0, type: 1 },
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        var params = {appId: result.Body.appId}
+                        getLoginInfo(params,2)
+                    } else {
+                        layer.alert(result.StatusMsg);
+                    }
+                }
+            })
+        });
+        form.render()
+          // 免登录认证
+        function avoidLogin() {
+            var appId = null
+            var uid = null
+            if (window.location.href.indexOf('appId=') > -1) {
+                appId = window.location.href.split('appId=')[1]
+            }
+            if (window.location.href.indexOf('uid=') > -1) {
+                uid = window.location.href.split('uid=')[1].split('&')[0]
+            }
+            if (uid !== null && uid !== undefined) {
+                var params = {uid: uid}
+                getLoginInfo(params,2) 
+            }
+            if (appId !== null && appId !== undefined) {
+              var params = {appId: appId}
+              getLoginInfo(params,2) 
+            }
+        };
+        // 登陆接口
+        function getLoginInfo (params,flag) {
+            var _this = this
+            $.ajax({
+                url: clpurl + 'userinfo/getUserInfoByAppId',
+                type: 'post',
+                data: params,
+                datatype: 'json',
+                async: false,
+                success: function (data) {
+                    if (data.statusCode === 1) {
+                        if (data.body === null) {
+                          if (Number(flag) === 1) {
+                            return 
+                          } else {
+                            layer.msg('抱歉,不存在该用户');
+                            return 
+                          }
+                        }
+                        this.uid = data.body.uid
+                        this.userName = data.body.userName
+                        this.userLevel = data.body.userLevel
+                        this.appCardNo = data.body.appCardNo
+                        this.mobile = data.body.mobile
+                        this.orderno = data.body.orderno
+                        setCookie('uid', data.body.uid)
+                        setCookie('userName', data.body.userName)
+                        setCookie('userLevel', data.body.userLevel)
+                        setCookie('appCardNo', data.body.appCardNo)
+                        setCookie('mobile', data.body.mobile)
+                        setCookie('userType', data.body.userType)
+                        setCookie('isFreeze', data.body.is_freeze)
+                        setCookie('isBlacklist', data.body.is_blacklist)
+                        setCookie('dqName', data.body.dqName)
+                        setCookie('areaId', data.body.areaId)
+                        setCookie('cityId', data.body.lishuId)
+                        setCookie('photo', data.body.photo)
+                        if (flag === 1) {
+                            // 大院登陆
+                            setCookie('loginType', 1)
+                        }   
+                        clearInterval(groupTimes)
+                        if(Number(data.body.userLevel)===3 && (Number(data.body.is_freeze)!==1 || Number(data.body.is_freeze)!==2)){
+                            window.location.href= '/pdm/cognition'
+                        } else{
+                            window.location.href= 'index?id=0'
+                        }
+                    } else {
+                      layer.alert(result.StatusMsg);
+                    }
+                }
+            })
+          };
+        // 获取二维码图片
+        function getCode () {
+            $.ajax({
+                url: 'https://piapi.rxjy.com/actionapi/AppLogin/GetEWM',
+                type: 'get',
+                data: {  AppId: 5},
+                success: function (data) {
+                  if (data.StatusCode === 0) {
+                    $('.appCodeRefresh').hide()
+                    $('.login-qr-code img').attr('src', data.Body.url)
+                    // 开启定时监听
+                    times = setInterval(function() {
+                      getLoginStatus(data.Body.loginId)
+                    }, 3000)
+                    // 1s分钟后重新请求二维码
+                   setTimeout(function() {
+                      codeOvertime(times)
+                    }, 60000)
+                  } else {
+                      layer.alert('data.statusMsg');
+                  }
+              }
+          });
+        };
+        // 超时请求
+        function codeOvertime (times) {
+            clearInterval(times)
+            $('.appCodeRefresh').show()
+        };
+        // 监听登陆状态
+        function getLoginStatus(loginId) {
+          $.ajax({
+                url: 'https://piapi.rxjy.com/actionapi/AppLogin/GetCheckEWMLogin',
+                type: 'get',
+                data: {loginId: loginId},
+                success: function (data) {
+                  if (data.StatusCode === 0) {
+                    codeOvertime(times)
+                    getLoginInfo({appId: data.Body.appId},2)
+                  } else {
+                      console.log(data.StatusMsg);
+                      // clearInterval(times)
+                  }
+              }
+          })
+        };
+        // 开启定时监听
+        groupTimes = setInterval(function() {
+          if (sessionStorage.getItem('loginout') === null) {
+             getGroupLoginStatus()
+          } else {
+            clearInterval(groupTimes)
+          }
+        }, 3000)
+        // 大院接口（监听大院是否登陆 登陆则进入index）
+        function getGroupLoginStatus() {
+          $.ajax({
+                url: 'https://3w.rxjy.com/user/info',
+                type: 'get',
+                xhrFields: {
+                  withCredentials: true
+                },
+                success: function (data) {
+                  if (data.phone !== null) {
+                    getLoginInfo({mobile: data.phone},1)
+                  } else {
+                    console.log(data)
+                  }
+              }
+          })
+        };
+    })
+</script>
+</body>

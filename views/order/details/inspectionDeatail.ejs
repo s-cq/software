@@ -1,0 +1,443 @@
+
+<% layout('layoutSimple.ejs') -%>
+<div class="rxadmin-contentnav clearfix">
+    <span class="fz-18">订单详情</span>
+</div>
+<div class="cu-details">
+    <!-- 基本信息 -->
+    <div id="inspectionDeatail-render"></div>
+    <!-- 发起 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>发起</span>
+            </div>
+        </div>
+        <div class="clearfix mt-1">
+            <div class="col-24 lh-24 pl-2 pb-1" id="inspectionProInfo-render"></div>
+            <div class="cu-card col-24 clearfix" id="inspectionContent-render"></div>
+        </div>
+    </div>
+     <!-- 执行 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>执行</span>
+            </div>
+        </div>
+        <div class="clearfix mt-2" id="inspectionImplement-render"></div>
+    </div>
+    <!-- 客户评价 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                <span>客户评价</span>
+            </div>
+        </div>
+        <div id="inspectionEvaluate-render">
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form','rate'], function(){
+        var form = layui.form;
+        var rate = layui.rate;
+        var statusName = ['评价', '执行', '发起']; // 订单流
+        var orderStage = ''; // 状态
+        var F_TYPE = '';
+        var F_KEY = '';
+        getInspectionData()
+        // 获取项经数据
+        function getInspectionData() {
+            // 获取项经流
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/findSolutionPerid',
+                type: 'GET',
+                data: { solutionNo: getQueryString('orderCode')},
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        getProjectContent(1,result.Body)
+                        F_TYPE = result.Body.F_TYPE
+                        F_KEY = result.Body.F_KEY
+                    }
+                }
+            });
+        }
+        // 获取项目内容信息
+        function getProjectContent(flag, dataInfo) {
+            $.ajax({
+                url: 'https://gsgapi.rxjy.com/api/senceProtection/getXJOrderInfo',
+                type: 'GET',
+                data: { solutionNo: getQueryString('orderCode')},
+                success: function (result) {
+                    if (result.StatusCode === 1) {
+                        if (flag === 1) {
+                            // 订单流模板渲染
+                            var getTpl = document.getElementById('inspectionDeatail-template').innerHTML
+                            var view = document.getElementById('inspectionDeatail-render');
+                            orderStage = dataInfo.orderStage
+                            var orderDate = {data:dataInfo, time: result.Body.record, statusList: statusName}
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                laytpl(getTpl).render(orderDate, function(html){
+                                    view.innerHTML = html;
+                                });
+                            });
+                            // 项目信息
+                            var getTplPro = document.getElementById('inspectionProInfo-template').innerHTML
+                            var viewPro = document.getElementById('inspectionProInfo-render');
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                laytpl(getTplPro).render(dataInfo, function(html){
+                                    viewPro.innerHTML = html;
+                                });
+                            });
+                            // 订单内容渲染
+                            var getTplContent = document.getElementById('inspectionContent-template').innerHTML
+                            var viewContent = document.getElementById('inspectionContent-render');
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                viewer()
+                                laytpl(getTplContent).render(result.Body, function(html){
+                                    viewContent.innerHTML = html;
+                                    // 切换
+                                    $("#inspectionContent-render .openButton span").click(function() {
+                                        if (Number($(this).attr('data-type')) === 1) {
+                                            $(this).removeClass('cRed').addClass('cBlue').text('[收起]')
+                                            $(this).attr('data-type',2)
+                                        } else {
+                                            $(this).removeClass('cBlue').addClass('cRed ').text('[展开]')
+                                            $(this).attr('data-type',1)
+                                        }
+                                        $(this).parents('.detail-box').find('.content-box').toggle()
+                                    })
+                                });
+                            });
+                            // 订单执行内容渲染
+                            var getTplImplement = document.getElementById('inspectionImplement-template').innerHTML
+                            var viewImplement = document.getElementById('inspectionImplement-render');
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                laytpl(getTplImplement).render({data:result.Body, orderStage:orderStage}, function(html){
+                                    viewImplement.innerHTML = html;
+                                    // 执行tab切换
+                                    $('#inspectionImplement-render .cu-navtab__item li').click(function() {
+                                        var index = $(this).index()
+                                        $(this).addClass('is-active').siblings().removeClass('is-active')
+                                        $(this).parents('#inspectionImplement-render').find('.card-content>.cu-card').eq(index).removeClass('dis-none').siblings().addClass('dis-none')
+                                        viewer();
+                                    });
+                                    $('#inspectionImplement-render .cu-navtab__item li').eq(0).click()
+                                    // 上传图片
+                                    $("#inspectionImplement-render .cu-upload__input").each(function() {
+                                        uploads({
+                                            // 上传控件ID
+                                            id: $(this).attr("id"),
+                                            // 是否传多个文件
+                                            mutil: false,
+                                            // 上传文件类型
+                                            mime_types: [{
+                                                title: "Image",
+                                                extensions: "jpg,gif,png"
+                                            }],
+                                            // 上传成功后回调函数 servername 图片域名  filename图片地址 url 图片全地址 id 上传空间ID
+                                            callback: function(servername, filename, url, id) {
+                                                saveXJPhoto(url, id.split('-')[1])
+                                            }
+                                        })
+                                    });
+                                });
+                            });
+                            if (orderStage > 4) {
+                                // 订单评价
+                                var getTplEvaluate = document.getElementById('inspectionEvaluate-template').innerHTML
+                                var viewEvaluate = document.getElementById('inspectionEvaluate-render');
+                                layui.use('laytpl', function(){
+                                    var laytpl = layui.laytpl;
+                                    laytpl(getTplEvaluate).render(result.Body, function(html){
+                                        viewEvaluate.innerHTML = html;
+                                        viewer();
+                                        rate.render({
+                                            elem: '#detail-star',
+                                            value: result.Body.result.evaluateStar,
+                                            readonly: true,
+                                        });
+                                    });
+                                });
+                            } else  if(orderStage === 4){
+                                $("#inspectionEvaluate-render").html("<div class='mtb-6 fz-16 fw-bold cRed tx-center'>等待客户评价</div>")
+                            } else {
+                                $("#inspectionEvaluate-render").html("<div class='mtb-6 fz-16 fw-bold cRed tx-center'>还没有到该阶段</div>")
+                            }
+                        }
+                        if (flag === 2) {
+                            var isSubmit = true
+                            for(var i=0; i<result.Body.do.length; i++) {
+                                for(var j=0; j<result.Body.do[i].standardPhotos.length; j++) {
+                                    if (result.Body.do[i].standardPhotos[j].photoList.length === 0) {
+                                        isSubmit = false
+                                    }
+                                }
+                            }
+                            if (isSubmit) {
+                                updateOrderSceneStage()
+                            }
+                        }
+                    }
+                }
+            });
+        };
+        // 保存图片
+        function saveXJPhoto(src,id) {
+            var params = {
+                code: F_KEY, // 订单对应的code
+                orderNo: getQueryString('orderno'), // 单号
+                id: id, // 图片对应得id
+                createNo: getCookie('appCardNo'), // 操作人的卡号
+                createName: getCookie('userName'), // 操作人的名字
+                imgUrl: src
+            };
+             $.ajax({
+                url: 'https://gsgapi.rxjy.com/api/safety/saveXJPhoto',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 1) {
+                        var html = '<li class="cu-upload-list__item">'+
+                                    '<img class="cu-upload-list__item-thumbnail" width="100px" height="95px" src="'+src+'">'+
+                                    '<span class="details-scene">现</span>'+
+                                '</li>'
+                        $("#inspectionImplement-render  #inspectionImplement-"+id+"").parents('.inspectionImplement-'+id+'').find('.cu-upload-list').append(html)
+                        viewer();
+                        layer.msg('上传图片成功');
+                        getProjectContent(2, '')
+                    }
+                }
+            });
+        };
+        // 阶段跳转接口
+        function updateOrderSceneStage() {
+            var params = {
+                stage: 4,
+                solutionNo: getQueryString('orderCode'),
+                orderNo: getQueryString('orderno'),
+                uid: uid,
+                userName: getCookie('userName'),
+                createName: getCookie('userName'),
+                createNo: uid,
+                fType: F_TYPE,
+                implementRemark: '项经巡检执行完成',
+                orderName: '项经巡检',
+                fKey: F_KEY,
+                updateBy: getCookie('appCardNo'),
+                updateNo: getCookie('userName')
+            };
+            $.ajax({
+                url: 'https://gsgapi.rxjy.com/api/senceProtection/updateOrderSceneStageNew',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 1) {
+                        console.log('阶段跳转成功')
+                        getInspectionData()
+                    }
+                }
+            });
+        }
+    })
+</script>
+
+<!-- 基本信息 -->
+<script  id="inspectionDeatail-template" type="text/html">
+    <div class="clearfix cu-card ptb-8">
+        <div class="col-8 tx-center pt-2 bor-dotted-right">
+            <p class="fz-16 mt-2 cLightGray">
+                <span>订单号&nbsp;:</span>
+                <span>{{d.data.orderCode}}</span>
+            </p>
+            <p class="fz-20 fw-bold cLightRed mtb-4">
+                <span class="fw-bold">订单状态&nbsp;:</span>
+                <span class="fw-bold">&nbsp;{{getStage(d.data.orderCode, d.data.orderStage)}}</span>
+            </p>
+            <div>
+                <img class="bor-rad50" src="{{getCookie('photo')}}" width="85px" height="85px" alt="">
+                <p class="fz-20 fw-bold mt-3">{{d.data.userName}}</p>
+                <p class="fz-16 mt-3 cOrange">订单名称：项经巡检</p>
+                <p class="fz-16 mt-3">地区: {{d.data.dqName}}</p>
+            </div>
+        </div>
+        <div class="col-16">
+            {{#  if(Number(d.data.orderStage) === 6){ }}
+                <div class="col-24 mb-6 tx-center fz-14 cLightGray">该订单已经完成,请关注其他订单,要加油哟！</div>
+            {{#  } }}
+            <div class="col-24">
+                <ul class="layui-timeline col-24">
+                    {{#  layui.each(d.statusList, function(index, item){ }}
+                        <li class="clearfix pl-4">
+                            <div class="col-7 fz-12 lh-22 ">
+                                <span class="fr mr-2"> 
+                                    {{# if ( item === '发起') { }}
+                                        {{ d.time.hasOwnProperty(3) ? formateDate(d.time[3]) : '--' }}
+                                    {{#  } else if ( item === '执行') { }}
+                                        {{ d.time.hasOwnProperty(4) ? formateDate(d.time[4]) : '--'  }}
+                                    {{#  } else if ( item === '评价') { }}
+                                        {{ d.time.hasOwnProperty(6) ? formateDate(d.time[6]) : '--' }}
+                                    {{#  } }}
+                                </span>
+                            </div>
+                            <ul class="fl">
+                                <li class="layui-timeline-item">
+                                    {{#  if(item === '发起'){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  } else if (item === '执行'){ }}
+                                        {{#  if(Number(d.data.orderStage) ===  3){ }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                        {{#  } else if (Number(d.data.orderStage)  >  3){ }}
+                                            <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                        {{#  }  else { }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                        {{#  }  }}
+                                    {{#  } else if (item === '评价'){ }}
+                                        {{#  if(Number(d.data.orderStage) === 4 ){ }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                        {{#  } else if (Number(d.data.orderStage) > 4){ }}
+                                            <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                        {{#  }  else { }}
+                                            <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                        {{#  }  }}
+                                    {{#  } }}
+                                    <div class="layui-timeline-content layui-text">
+                                        <h3 class="layui-timeline-title fz-14 fw-bold">{{item}}</h3>
+                                        <p class="fz-12">订单：
+                                            {{#  if (item === '发起') { }}
+                                                {{d.data.orderCode}} {{Number(d.data.orderStage) > 2 ? '已于'+formateDate(d.time['3'])+'由系统发起完成':'等待发起'}}
+                                            {{#  } else if (item === '执行') { }}
+                                                {{d.data.orderCode}} {{Number(d.data.orderStage) > 3 ? '已于'+formateDate(d.time['4'])+'执行完成':'等待执行'}}
+                                            {{#  } else if (item === '评价'){ }}
+                                                {{d.data.orderCode}} {{Number(d.data.orderStage) > 4 ? '已于'+formateDate(d.time['6'])+'评价完成':'等待评价'}}
+                                            {{#  } }}
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    {{#  }); }}
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- 项目信息 -->
+<script  id="inspectionProInfo-template" type="text/html">
+    <p class="col-6">
+        <span class="cLightGray pr-1">项目单号</span> 
+        <span>{{d.orderno}}</span>
+    </p>
+    <p class="col-6">
+        <span class="cLightGray pr-1">进入在施时间</span> 
+        <span>{{d.starttime === null ? '暂无时间' : d.starttime}}</span>
+    </p>
+    <p class="col-6">
+        <span class="cLightGray pr-1">订单日期</span> 
+        <span>{{d.startDate}} - {{d.xjEndDate}}</span>
+    </p>
+    <p class="col-6">
+        <span class="cLightGray pr-1">项目阶段</span> 
+        <span>{{Number(d.constructionPeriod) === 1 ?  '施前' : Number(d.constructionPeriod) === 2 ?  '施中' : '施尾'}}</span>
+    </p>
+</script>
+<!-- 发起标准图片 -->
+<script  id="inspectionContent-template" type="text/html">
+    {{#  layui.each(d.do, function(index, item){ }}
+        <div class="detail-box mb-2 clearfix">
+            <div class="fz-14">
+                <i class="card-radius mr-2"></i>
+                <span>{{item.workerTypeCodeDetail}}</span>
+                <span class="ml-2">任务: {{item.num}}个</span>
+                <span class="ml-2 pointer openButton">
+                    <span class="cRed fw-bold" data-type="1">[展开]</span>
+                </span>
+            </div>
+            <div class="content-box dis-none">
+                <div class="pl-2">
+                    {{#  layui.each(item.standardPhotos, function(index, itemChild){ }}
+                        <div class="relative col-12 mt-2">
+                            <div class="fl relative viewer-images">
+                                <img class="cu-upload-list__item-thumbnail" width="140px" height="130px" src="{{itemChild.picturePath}}">
+                                <span class="details-stand">标</span>
+                                <span class="right-fixed fw-bold" title="{{itemChild.standard_name}}">{{ellipsisText(itemChild.standard_name,8)}}</span>
+                                <span class="cu-upload-list__item-name">{{itemChild.worker_type_name}}</span>
+                            </div>
+                            <div class="col-17 ml-2 lh-20 mt-2" title="{{itemChild.content}}">{{itemChild.content}}</div>
+                        </div>
+                    {{#  }); }}
+                </div>
+            </div>
+        </div>
+    {{#  }); }}
+</script>
+<!-- 执行内容 -->
+<script  id="inspectionImplement-template" type="text/html">
+    <div class="cu-navtab col-2">
+        <ul class="lh-28 cu-navtab__item">
+            {{#  layui.each(d.data.do, function(index, item){ }}
+                <li>
+                    <span class="pl-2">{{item.workerTypeCodeDetail}}</span>
+                    <span class="cu-navtab__triangle"></span>
+                </li>
+            {{#  }); }}
+        </ul>
+    </div>
+    <div class="card-content">
+        {{#  layui.each(d.data.do, function(index, item){ }}
+            <div class="cu-card col-21 ml-4 dis-none clearfix">
+                {{#  layui.each(item.standardPhotos, function(index, itemChild){ }}
+                    <div class="col-12 clearfix inspectionImplement-{{itemChild.id}}" style="min-height:210px">
+                        <div class="col-23 mb-2 lh-20">{{itemChild.content}}</div>
+                        <ul class="cu-upload-list fl  viewer-images">
+                            <li class="cu-upload-list__item">
+                                <img class="cu-upload-list__item-thumbnail" width="100px" height="95px" src="{{itemChild.picturePath}}">
+                                <span class="details-stand">标</span>
+                                <span class="right-fixed fw-bold" title="{{itemChild.standard_name}}">{{ellipsisText(itemChild.standard_name,4)}}</span>
+                                <span class="cu-upload-list__item-name">{{itemChild.worker_type_name}}</span>
+                                <div class="cu-upload-list__item-actions">
+                                  <span class="cu-upload-list__item-preview enlarge_viewer"></span>
+                                  <span class="cu-upload-list__item-delete"></span>
+                                </div>
+                            </li>
+                            {{#  layui.each(itemChild.photoList, function(index, itemChildChild){ }}
+                                <li class="cu-upload-list__item">
+                                    <img class="cu-upload-list__item-thumbnail" width="100px" height="95px" src="{{itemChildChild.orderPhoto}}">
+                                    <span class="details-scene">现</span>
+                                </li>
+                            {{#  }); }}
+                        </ul>
+                        {{#  if(Number(d.orderStage) === 3){ }}
+                            <div class="cu-upload fl" style="width:100px;height:95px;">
+                                <span class="cu-upload__icon"></span>
+                                <input type="file" name="file" class="cu-upload__input" id="inspectionImplement-{{itemChild.id}}" data-code="{{itemChild.project_order_code}}">
+                            </div>
+                        {{#  } }}
+                    </div>
+                {{#  }); }}
+            </div>
+        {{#  }); }}
+    </div>
+</script>
+<!-- 客户评价 -->
+<script  id="inspectionEvaluate-template" type="text/html">
+    <div id="detail-star" class="ml-2"></div>
+    <div class="ml-2">{{d.result.evaluateContent}}</div>
+    <div class="mt-2 clearfix ml-2">
+        <div class="viewer-images relative fl mr-2">
+            {{#  layui.each(d.result.projectOrderPhotoEntities, function(index, item){ }}
+                <img src="{{item.orderPhoto}}" width="85px" height="85px" alt="">
+            {{#  }); }}
+        </div>
+    </div>
+</script>

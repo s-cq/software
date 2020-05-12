@@ -1,0 +1,50 @@
+<div class="rx-header-wrap">
+    <div id="header"></div>
+    <div class="rx-header-top">
+        <div class="rx-header-top-con clearfix">
+            <div class="rx-header-city-div fl">
+                <span class="rx-header-city">成都</span>
+            </div>
+            <div class="fr userloginout">
+                <span id="username">陈奎</span>
+                <a href="/loginout">退出</a>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .userloginout{
+        font-size: 14px;
+        height: 28px;
+        line-height: 28px;
+    }
+    #username{
+        padding-right: 10px;
+    }
+</style>
+<script>
+    var cityname = getCookie('dqName');
+    var username = getCookie('userName');
+    $(".rx-header-city").text(cityname);
+    $("#username").text(username);
+    if(Number(getCookie('loginType')) === 1) {
+      $('.rx-header-top').hide()
+      // 请求头部
+      $.ajax({
+          //请求方式
+          type : "get",
+          url : "https://3w.rxjy.com/public/other/header",
+          xhrFields: {
+            withCredentials: true
+          },
+          success : function(html) {
+              $('#header').html(html)
+          },
+          //请求失败，包含具体的错误信息
+          error : function(e){
+              console.log(e.status);
+              console.log(e.responseText);
+          }
+      });
+    }
+</script>

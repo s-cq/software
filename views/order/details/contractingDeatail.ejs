@@ -1,0 +1,876 @@
+
+<% layout('layoutSimple.ejs') -%>
+<div class="rxadmin-contentnav clearfix">
+    <span class="fz-18">订单详情</span>
+</div>
+<div class="cu-details">
+    <!-- 基本信息 -->
+    <div id="contractingDeatail-render"></div>
+    <!-- 项目详情 -->
+    <div id="contractingInfo-render"></div>
+    <!-- 意向 -->
+    <div class="cu-card mt-4 dis-none" id="refusal-card">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>意向</span>
+            </div>
+        </div>
+        <div class="clearfix ml-2 pr-4 mt-1 dis-none" id="refusal-opertion">
+            <div class="cRed">
+                请查看信息后 点击按钮操作意接和拒单  
+            </div>
+            <div class="layui-form mt-2 dis-none"  lay-filter="refusalButton">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">拒单理由</label>
+                    <div class="layui-input-block">
+                        <textarea name="refusalValue" required lay-verify="required" placeholder="请输入拒单理由" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="tx-right">
+                        <button class="layui-btn layui-btn-sm layui-btn-normal bind-save bgRed" lay-submit  lay-filter="refusalButton">拒单</button>
+                        <button class="layui-btn layui-btn-sm layui-btn-normal bind-save cancelButton">取消</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tx-center" id="refusal-button">
+                <button class="layui-btn layui-btn-sm layui-btn-normal bind-save refusalButton">意接</button>
+                <button class="layui-btn layui-btn-sm layui-btn-normal bind-save bgRed">拒单</button>
+            </div>
+        </div>
+        <div id="refusal-content" class="dis-none">
+            <div class="cRed mtb-2 tx-center">您已意向接单完成</div>
+        </div>
+    </div>
+    <!-- 结果 -->
+    <div class="cu-card mt-4 dis-none" id="result-card">
+        <div class="mtb-6 fz-16 fw-bold cRed tx-center"></div>
+    </div>
+    <!-- 接单 -->
+    <div id="contractingImg-render"></div>
+    <!-- 弹框图片内容 -->
+    <div id="imgBox-render"  class="layui-carousel dis-none"></div>
+    <!-- 弹框显示合同 -->
+    <div class="dis-none  pa-1" id="argeeMent-render"></div>
+</div>
+
+<script>
+    layui.use(['form', 'carousel'], function(){
+        var form = layui.form;
+        var carousel = layui.carousel
+        var statusName = ['接单','意向', '派单']; // 订单流
+        var proName = ''; // 项目名称
+        var time = ''; // 派单时间
+        var orderStage = ''; // 当前阶段
+        viewer()
+        getContractingData()
+        // 获取发包数据
+        function getContractingData() {
+            // 获取发包流
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/findtsolution',
+                type: 'POST',
+                data: JSON.stringify({orderCode: getQueryString('orderCode'),areaid: ''}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        // 订单流模板渲染
+                        var getTpl = document.getElementById('contractingDeatail-template').innerHTML
+                        var view = document.getElementById('contractingDeatail-render');
+                        console.log(result.Body[0])
+                        orderStage = result.Body[0].orderStage
+                        proName =  result.Body[0].proName
+                        time =  result.Body[0].F_START_DATE
+                        if (orderStage === 4) {
+                            statusName = ['拒单', '派单']
+                        }
+                        if (orderStage === 5) {
+                            statusName = ['退单', '派单']
+                        }
+                        var orderDate = {data:result.Body[0],statusList: statusName}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(orderDate, function(html){
+                                view.innerHTML = html;
+                            });
+                        });
+                        getProjectInfo(result.Body[0])
+                        // 判读是否已经意向接单
+                        if(orderStage >=1 && orderStage !== 4 && orderStage !== 5 ) {
+                            $("#refusal-card").show()
+                            if (orderStage === 1) {
+                                $("#refusal-opertion").show()
+                                 $("#refusal-content").hide()
+                            } else {
+                                $("#refusal-content").show()
+                                $("#refusal-opertion").hide()
+                            }
+                        } else {
+                            $("#refusal-card").hide()
+                        };
+                        // 判读是否已经接单
+                        if(orderStage >=2 && orderStage !== 4 && orderStage !== 5 ) {
+                            $("#contractingImg-render").show()
+                            getProjectImg(result.Body[0])
+                        } else {
+                            $("#contractingImg-render").hide()
+                        }
+                        // 接单和拒单
+                        if( orderStage === 4 || orderStage === 5) {
+                            $("#result-card").show();
+                            if (orderStage === 4) {
+                                $("#result-card>div").text('您已经拒单')
+                            }
+                            if (orderStage === 5) {
+                                $("#result-card>div").text('您已经退单')
+                            }
+                        } else {
+                            $("#result-card").hide()
+                        }
+                    }
+                }
+            });
+        };
+        // 获取项目信息
+        function getProjectInfo(dataInfo) {
+            // 获取项目信息
+            $.ajax({
+                url: 'https://gams.rxjy.com/a/ams/workorderClientInfo/getProInfo',
+                type: 'GET',
+                data: {orderno: getQueryString('orderno')},
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        // 项目信息渲染
+                        var getTpl = document.getElementById('contractingInfo-template').innerHTML
+                        var view = document.getElementById('contractingInfo-render');
+                        var projectInfo = {data: dataInfo, projectData: result.body}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(projectInfo, function(html){
+                                view.innerHTML = html;
+                            });
+                        });
+                    }
+                }
+            });
+        };
+        // 获取图片
+        function getProjectImg(dataInfo) {
+            // 协议
+            $('#argeeMent-render').load('https://gxmapi.rxjy.com/Protocol.html?orderno='+getQueryString('orderno')+'&pmuid='+uid+'')
+            // 获取项目信息
+            $.ajax({
+                url: 'https://gams.rxjy.com/a/ams/workorderClientInfo/getContract',
+                type: 'GET',
+                data: {orderno: getQueryString('orderno')},
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        // 图片渲染
+                        var workingList = []; // 施工图
+                        var shiYaImgList = []; // 施工图压缩包
+                        var sceneList = result.body.sitePhotosImgList; // 现场图
+                        var effectPictureList = result.body.effectImgList; // 效果图
+                        var cadeffect = []; // 获取CAD图
+                        for(var i=0; i<result.body.drawingImgList.length; i++) {
+                            if (result.body.drawingImgList[i].remark === "施工图封面" || result.body.drawingImgList[i].remark === "点位图" || result.body.drawingImgList[i].remark === "平面图") {
+                                workingList.push(result.body.drawingImgList[i].attrImgUrl)
+                            }
+                            if (result.body.drawingImgList[i].remark === "施工图") {
+                                shiYaImgList.push(result.body.drawingImgList[i])
+                            }
+                            if (result.body.drawingImgList[i].remark === "CAD压缩包") {
+                                cadeffect.push(result.body.drawingImgList[i])
+                            }
+                        };
+                        var getTplImg = document.getElementById('contractingImg-template').innerHTML
+                        var viewImg = document.getElementById('contractingImg-render');
+                        var data = {workingList:workingList, shiYaImgList:shiYaImgList,sceneList:sceneList,effectPictureList:effectPictureList,cadeffect:cadeffect,data: dataInfo}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTplImg).render(data, function(html){
+                                viewImg.innerHTML = html;
+                                viewer();
+                                // 点击按钮查看相应照片
+                                $("#contractingImg-render .printButton").click(function() {
+                                    var dataType = $(this).attr("data-type");
+                                    var dataImg = []
+                                    // 1为施工 2.为现场 3.为效果
+                                    if (Number(dataType) === 1) {
+                                        dataImg = workingList
+                                    } else if (Number(dataType) === 2) {
+                                        dataImg = sceneList
+                                    } else if (Number(dataType) === 3) {
+                                        dataImg = effectPictureList
+                                    }
+                                    if (dataImg.length === 0) {
+                                        layer.msg('暂无图片');
+                                        return
+                                    }
+                                    var getTplImg = document.getElementById('imgBox-template').innerHTML
+                                    var viewImg = document.getElementById('imgBox-render');
+                                    layui.use('laytpl', function(){
+                                        var laytpl = layui.laytpl;
+                                        laytpl(getTplImg).render(dataImg, function(html){
+                                            viewImg.innerHTML = html;
+                                            carousel.render({
+                                                elem: '#imgBox-render',
+                                                autoplay: false,
+                                                width: '100%',
+                                                height: "100%",
+                                            });
+                                            layer.open({
+                                                type: 1,
+                                                title:"预览打印",
+                                                area: ['80%', '90%'],
+                                                content: $('#imgBox-render'),
+                                                btn: '打印',
+                                                btnAlign: 'c', //按钮居中
+                                                shade: 0.5, //不显示遮罩
+                                                yes: function(){
+                                                   doPrint()
+                                                }
+                                            });
+                                        });
+                                    });
+                                })
+                                // 点击按钮下载图片(CAD)
+                                $("#contractingImg-render .cadButton").click(function() {
+                                    if (cadeffect.length > 0) {
+                                        window.open(cadeffect[0].attrImgUrl)
+                                    } else {
+                                        layer.msg('暂无CAD图片')
+                                    }
+                                });
+                                // 点击按钮下载施工图压缩包(施工图压缩包)
+                                $("#contractingImg-render .shigongButton").click(function() {
+                                    if (shiYaImgList.length > 0) {
+                                        window.open(shiYaImgList[0].attrImgUrl)
+                                    } else {
+                                        layer.msg('暂无施工图压缩包')
+                                    }
+                                });
+                                // 点击同意协议
+                                $("#contractingImg-render .agreeButton").click(function() {
+                                    // 同意协议
+                                    if (dataInfo.agreementPass === 1) {
+                                        layer.open({
+                                            type: 1,
+                                            title: '协议',
+                                            shadeClose: true,
+                                            shade: 0.5,
+                                            area: ['80%', '90%'],
+                                            content: $('#argeeMent-render'), //iframe的url
+                                        }); 
+                                    } else {
+                                        layer.open({
+                                            type: 1,
+                                            title:"协议",
+                                            area: ['80%', '90%'],
+                                            content: $('#argeeMent-render'),
+                                            btn: '同意协议',
+                                            btnAlign: 'c', //按钮居中
+                                            shade: 0.5, //不显示遮罩
+                                            yes: function(){
+                                                // 同意协议接口
+                                                updateAgreementByCode()
+                                            }
+                                        });
+                                    }
+                                });
+                                // 接单
+                                $(".retreatButton").click(function() {
+                                    layer.confirm('确定接单吗？', {
+                                        btn: ['同意','取消'] //按钮
+                                    }, function(){
+                                        // 同意
+                                        acceptanceStatus(2, 4, '', '接单')
+                                    }, function(){
+                                        layer.msg('您已取消接单', {icon: 1});
+                                    });
+                                });
+                                // 退单按钮
+                                $("#contractingImg-render .bgRed").click(function() {
+                                    $("#retreat-opertion.layui-form").show()
+                                    $("#retreat-button").hide()
+                                });
+                                // 退单取消按钮
+                                $("#contractingImg-render .cancelButton").click(function() {
+                                    $("#retreat-opertion.layui-form").hide()
+                                    $("#retreat-button").show()
+                                });
+                            });
+                        });
+                    }
+                }
+            });
+        };
+        // 意向接单
+        $(".refusalButton").click(function() {
+            layer.confirm('确定意向接单吗？', {
+                btn: ['同意','取消'] //按钮
+            }, function(){
+                // 同意
+                acceptanceStatus(1, 0, '', '意向')
+            }, function(){
+                layer.msg('您已取消意向接单', {icon: 1});
+            });
+        });
+        // 拒单按钮
+        $("#refusal-button .bgRed").click(function() {
+            $("#refusal-opertion .layui-form").show()
+            $("#refusal-button").hide()
+        });
+        // 拒单取消按钮
+        $("#refusal-opertion .cancelButton").click(function() {
+             $("#refusal-opertion .layui-form").hide()
+            $("#refusal-button").show()
+        });
+        // 拒单
+        form.on('submit(refusalButton)', function(data){
+            if(data.field.refusalValue.replace(/(^\s*)|(\s*)$/g,"") === '') {
+                layer.msg('拒单理由不能为空', {icon: 5});
+                return
+            }
+            layer.confirm('确定拒单吗？', {
+                btn: ['同意','取消'] //按钮
+            }, function(){
+                // 同意
+                acceptanceStatus(2, 5, '', '拒单')
+            }, function(){
+                layer.msg('您已取消拒单', {icon: 1});
+            });
+        });
+        // 退单
+        form.on('submit(retreatButton)', function(data){
+            if(data.field.retreatValue.replace(/(^\s*)|(\s*)$/g,"") === '') {
+                layer.msg('退单理由不能为空', {icon: 5});
+                return
+            }
+            layer.confirm('确定退单吗？', {
+                btn: ['同意','取消'] //按钮
+            }, function(){
+                // 同意
+                acceptanceStatus(2, 1, '', '退单')
+            }, function(){
+                layer.msg('您已取消退单', {icon: 1});
+            });
+        });
+        // 意向接单 拒单 走接口(张建刚接口 生成订单)
+        function acceptanceStatus(flag, index,value,name) {
+            var params = {
+                isF: index === 1 ? 1 : 0,
+                orderNo: getQueryString('orderCode'),
+                workorderNo: getQueryString('orderno'), // '22-201927'
+                pmUid: uid, // this.twoToThreeInfo.F_USER_ID
+                pmUserName: getCookie('userName'), // '王新平', // this.twoToThreeInfo.managerName
+                type: 1,
+                subject: 2, // 1 为拒单 2.为退单
+                remark: value,
+                money: index === 1 ? 3000 : 0,
+                status: flag, // 接单 2  退单 2 意接 1 拒单 2
+                isDel: 0,
+                createUser: getCookie('userName'), // '张建刚', // this.userInfo.as_fullName
+                createCard: getCookie('appCardNo'), // '001243242', // this.userInfo.as_cardNo
+                parentOrderNo: getQueryString('orderCode'), // 'G01_R6001_03', // this.twoToThreeInfo.orderCode
+                orderName: name,
+                userCardNo: getCookie('appCardNo'), // 'g010012', // this.userInfo.userNo
+                fineSubject: 10,
+                fineType: 2,
+                SubjectA: 415,
+                SubjectB: 670,
+                fineStage: 1,
+                CorpsId: 362,
+                SourceType: 28,
+                DivisionId: 4,
+                order_name: proName,
+                publishTime: formateDate(time),
+                result: index, // 接单 4  退单 1 意接 0 拒单 5,
+                acceptanceTime: formateDate(new Date())
+            };
+            $.ajax({
+                url: 'https://gxmrs.rxjy.com/fine/order/acceptanceStatus',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    // currentButton 1 为意向接单 2.为拒单
+                    // index 接单 4  退单 1 意接 0 拒单 5
+                    if (result.StatusCode === 0) {
+                        if (index === 0) {
+                            updateTsolution(2)
+                        } else if (index === 5) {
+                            UpPageNotic(1)
+                        } else if (index === 4) {
+                            updateTsolution(6)
+                        } else if (index === 1) {
+                            UpPageNotic(2)
+                        }
+                    } else {
+                        if (index === 0) {
+                            layer.msg('意接失败', {time: 3000, icon: 7})
+                        } else if (index === 2) {
+                            layer.msg('拒单失败', {time: 3000, icon: 7})
+                        } else if (index === 4) {
+                            layer.msg('接单失败', {time: 3000, icon: 7})
+                        } else if (index === 1) {
+                            layer.msg('退单失败', {time: 3000, icon: 7})
+                        }
+                    }
+                }
+            });
+        };
+        // 调整状态（江涛接口）
+        function updateTsolution (stage) {
+            var params = {
+                stage: stage,
+                solutionNo: getQueryString('orderCode')
+            };
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/updateTsolution',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        if (Number(stage) === 2) {
+                            layer.msg('您已意向接单成功', {time: 3000, icon: 7})
+                        } else if (Number(stage) === 4) {
+                            layer.msg('您已拒单成功', {time: 3000, icon: 7})
+                        } else if (Number(stage) === 6) {
+                            layer.msg('您已接单成功', {time: 3000, icon: 7})
+                        } else if (Number(stage) === 5) {
+                            layer.msg('您已罚款3000', {time: 3000, icon: 7})
+                        }
+                        getContractingData()
+                    }
+                }
+            });
+        };
+        // 拒单单独走的接口（总监）拒单 1 退单2
+        function UpPageNotic(flag) {
+            var params = {
+                F_SERIES_ID: getQueryString('orderCode'),
+                F_FLAG: flag
+            };
+            $.ajax({
+                url: 'https://gbjapi.rxjy.com/api/WorkOrder/UpPageNotic',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 1) {
+                        if (flag === 1) {
+                            updateTsolution(4)
+                        } else if (flag === 2) {
+                            updateTsolution(5)
+                        }
+                    } else {
+                         if (flag === 1) {
+                           layer.msg('拒单失败', {time: 3000, icon: 7})
+                        } else if (flag === 2) {
+                           layer.msg('退单失败', {time: 3000, icon: 7})
+                        }
+                    }
+                }
+            });
+        }
+        // 同意协议的接口
+        function updateAgreementByCode() {
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/updateAgreementByCode',
+                type: 'POST',
+                data: JSON.stringify({solutionNo:getQueryString('orderCode') }),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        layer.msg('同意协议成功');
+                        layer.closeAll();
+                        // 重新调用接口
+                        getContractingData()
+                    }
+                }
+            });
+        };
+        // 打印
+        function doPrint() { 
+            bdhtml=window.document.body.innerHTML; 
+            sprnstr="<!--startprint-->"; //开始打印标识字符串有17个字符
+            eprnstr="<!--endprint-->"; //结束打印标识字符串
+            prnhtml=bdhtml.substr(bdhtml.indexOf(sprnstr)+17); //从开始打印标识之后的内容
+            prnhtml=prnhtml.substring(0,prnhtml.indexOf(eprnstr)); //截取开始标识和结束标识之间的内容
+            window.document.body.innerHTML=prnhtml; //把需要打印的指定内容赋给body.innerHTML
+            window.print(); //调用浏览器的打印功能打印指定区域
+            window.document.body.innerHTML=bdhtml;//重新给页面内容赋值；
+        };
+    })
+
+</script>
+<!-- 基本信息 -->
+<script  id="contractingDeatail-template" type="text/html">
+    <div class="clearfix cu-card ptb-8">
+        <div class="col-8 tx-center pt-2 bor-dotted-right">
+            <p class="fz-16 mt-2 cLightGray">
+                <span>订单号&nbsp;:</span>
+                <span>{{d.data.orderCode}}</span>
+            </p>
+            <p class="fz-20 fw-bold cLightRed mtb-4">
+                <span class="fw-bold">订单状态&nbsp;:</span>
+                <span class="fw-bold">&nbsp;{{getStage(d.data.orderCode, d.data.orderStage)}}</span>
+            </p>
+            <div>
+                <img class="bor-rad50" src="{{getCookie('photo')}}" width="85px" height="85px" alt="">
+                <p class="fz-20 fw-bold mt-3">{{d.data.userName}}</p>
+                <p class="fz-16 mt-3 cOrange">订单名称：发包</p>
+                <p class="fz-16 mt-3">地区: {{d.data.areaName}}</p>
+            </div>
+        </div>
+        <div class="col-16">
+            {{#  if(Number(d.data.orderStage) === 4 || Number(d.data.orderStage) === 5 || Number(d.data.orderStage) === 6){ }}
+                <div class="col-24 mb-6 tx-center fz-14 cLightGray">该订单已经完成,请关注其他订单,要加油哟！</div>
+            {{#  } }}
+            <div class="col-24">
+                <ul class="layui-timeline col-24">
+                    {{#  layui.each(d.statusList, function(index, item){ }}
+                    <li class="clearfix pl-4">
+                        <div class="col-7 fz-12 lh-22 ">
+                            <span class="fr mr-2"> 
+                                {{# if ( item === '派单') { }}
+                                    {{ formateDate(d.data.F_START_DATE) }}
+                                {{#  } else if ( item === '意向') { }}
+                                    {{ formateDate(d.data.yesDate) }}
+                                {{#  } else if ( item === '拒单') { }}
+                                    {{ formateDate(d.data.yesDate) }}
+                                {{#  } else if (item === '接单'){ }}
+                                    {{ formateDate(d.data.sucorderDate) }}
+                                {{#  } else if (item === '退单'){ }}
+                                    {{ formateDate(d.data.sucorderDate) }}
+                                {{#  } }}
+                            </span>
+                        </div>
+                        <ul class="fl">
+                            <li class="layui-timeline-item">
+                                {{#  if(item === '派单'){ }}
+                                    {{#  if( Number(d.data.orderStage) ===  0){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage)  >  0){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                    <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                {{#  } else if (item === '意向'){ }}
+                                    {{#  if(Number(d.data.orderStage) ===  1){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage)  >  1){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } else if (item === '拒单'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 4 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 4){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } else if (item === '接单'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 2 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 2){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  }  else if (item === '退单'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 5 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 5){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{# } }}
+                                <div class="layui-timeline-content layui-text">
+                                    <h3 class="layui-timeline-title fz-14 fw-bold">{{item}}</h3>
+                                    <p class="fz-12">订单：
+                                        {{#  if (item === '派单') { }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) > 0 ? '已于'+formateDate(d.data.F_START_DATE)+'派单完成':'等待派单'}}
+                                        {{#  } else if (item === '意向') { }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) > 1 ? '已于'+formateDate(d.data.yesDate)+'意向接单完成':'等待意向接单'}}
+                                        {{#  } else if (item === '拒单'){ }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) === 4 ? '已于'+formateDate(d.data.yesDate)+'拒单':''}}
+                                        {{#  } else if (item === '接单'){ }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) > 2 ? '已于'+formateDate(d.data.sucorderDate)+'接单完成':'等待接单'}}
+                                        {{#  } else if (item === '退单'){ }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) === 5 ? '已于'+formateDate(d.data.sucorderDate)+'退单':''}}
+                                        {{#  } }}
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    {{#  }); }}
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- 项目详情 -->
+<script  id="contractingInfo-template" type="text/html">
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>基本信息</span>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="col-24 ml-2 mt-2">
+                <div class="fz-14">
+                    <i class="card-radius mr-2"></i>
+                    <span>项目</span>
+                </div>
+                <div class="lh-24 mt-2 ml-4">
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">项目单号</span> 
+                        <span>{{d.projectData.workOrderInfo.orderno}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">项目名称</span> 
+                        <span>{{d.projectData.workOrderInfo.proname}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">项目类型</span> 
+                        <span>{{d.projectData.workOrderInfo.evelName}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">总金额</span> 
+                        <span>{{toFixed(d.projectData.workOrderInfo.decorationBillFee)}}元</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">项目面积</span> 
+                        <span>{{d.projectData.workOrderInfo.proarea}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">夜间施工</span> 
+                        <span>{{Number(d.projectData.workOrderInfo.amNightworkFee) > 0 ? '是' : '否'}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">夜间施工费</span> 
+                        <span>{{d.projectData.workOrderInfo.amNightworkFee}}</span>
+                    </p>
+                    <p class="col-12">
+                        <span class="cLightGray pr-1">项目地址</span> 
+                        <span>{{d.projectData.workOrderInfo.proaddr}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-24 ml-2 mt-2">
+                <div class="fz-14">
+                    <i class="card-radius mr-2"></i>
+                    <span>甲方</span>
+                </div>
+                <div class="lh-20 mt-2 ml-4">
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">地区</span> 
+                        <span>{{d.projectData.workOrderInfo.dq_name}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">公司</span> 
+                        <span>{{d.projectData.workOrderInfo.compName}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">甲方姓名</span> 
+                        <span>{{d.projectData.workOrderInfo.partAChief}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">甲方电话</span> 
+                        <span>{{d.projectData.workOrderInfo.partAChiefMobile}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-24 ml-2 mt-2">
+                <div class="fz-14">
+                    <i class="card-radius mr-2"></i>
+                    <span>日期</span>
+                </div>
+                <div class="lh-20 mt-2 ml-4">
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">签约时期</span> 
+                        <span>{{formateDate(d.projectData.workOrderInfo.designerSignTime)}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">预计开工日期</span> 
+                        <span>{{d.projectData.workOrderInfo.expectBeginDate}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">预计结束日期</span> 
+                        <span>{{d.projectData.workOrderInfo.expectEndDate}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">工期</span> 
+                        <span>{{d.projectData.workOrderInfo.ConstructionPeriod}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-24 ml-2 mt-2">
+                <div class="fz-14">
+                    <i class="card-radius mr-2"></i>
+                    <span>发包</span>
+                </div>
+                <div class="lh-20 mt-2 ml-4">
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">派单时间</span> 
+                        <span> {{formateDate(d.data.F_START_DATE)}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">发包额</span> 
+                        <span>{{toFixed(d.data.actualMoney)}}元</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-24 ml-2 mt-2">
+                <div class="fz-14">
+                    <i class="card-radius mr-2"></i>
+                    <span>设计师</span>
+                </div>
+                <div class="lh-20 mt-2 ml-4">
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">设计师</span> 
+                        <span>{{d.projectData.workOrderInfo.designerUsername}}</span>
+                    </p>
+                    <p class="col-6">
+                        <span class="cLightGray pr-1">设计师电话</span> 
+                        <span>{{d.projectData.workOrderInfo.designerSignTime}}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- 接单 -->
+<script  id="contractingImg-template" type="text/html">
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>接单</span>
+            </div>
+        </div>
+        <div class="clearfix">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <th class="tx-center minW100">名称</th>
+                        <th class="tx-center">图片</th>
+                        <th class="tx-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="tx-center minW100">工程量</td>
+                        <td>暂无图片</td>
+                        <td class="tx-center">
+                            <a href="https://gbjcbl.rxjy.com/MultiLeavel.aspx?flag=3&rwdid={{getQueryString('orderno')}}" target="_blank" class="layui-btn layui-btn-sm layui-btn-normal">审计成本</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tx-center minW100">施工图</td>
+                        <td>
+                            <div class="viewer-images relative">
+                                {{#  layui.each(d.workingList, function(index, item){ }}
+                                    <img src="{{item}}" width="85px" height="85px" alt="" class="mt-1">
+                                {{#  }); }}
+                                {{#  if (d.workingList.length === 0) { }}
+                                    暂无图片
+                                {{#  } }}
+                            </div>
+                        </td>
+                        <td class="tx-center">
+                            <button class="layui-btn layui-btn-sm layui-btn-normal workButton printButton" data-type="1">预览施工图片</a>
+                            <button class="layui-btn layui-btn-sm layui-btn-normal cadButton">下载CAD图</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-normal shigongButton mt-1">下载施工压缩包</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tx-center minW100">现场图</td>
+                        <td>
+                            <div class="viewer-images relative">
+                                {{#  layui.each(d.sceneList, function(index, item){ }}
+                                    <img src="{{item}}" width="85px" height="85px" alt="" class="mt-1">
+                                {{#  }); }}
+                                {{#  if (d.sceneList.length === 0) { }}
+                                    暂无图片
+                                {{#  } }}
+                            </div>
+                        </td>
+                        <td class="tx-center">
+                            <button class="layui-btn layui-btn-sm layui-btn-normal sceneButton printButton" data-type="2"> 预览现场图片</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tx-center minW100">效果图</td>
+                        <td>
+                            <div class="viewer-images relative">
+                                {{#  layui.each(d.effectPictureList, function(index, item){ }}
+                                    <img src="{{item}}" width="85px" height="85px" alt="" class="mt-1">
+                                {{#  }); }}
+                                {{#  if (d.effectPictureList.length === 0) { }}
+                                    暂无图片
+                                {{#  } }}
+                            </div>
+                        </td>
+                        <td class="tx-center">
+                            <button class="layui-btn layui-btn-sm layui-btn-normal effectButton printButton" data-type="3"> 预览效果图片</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            {{#  if (d.data.agreementPass === 0) { }}
+                                <div class="fl lh-30 cRed">您尚未同意协议</div>
+                            {{#  } else { }}
+                                <div class="fl lh-30 cGreen">您已同意协议</div>
+                            {{#  } }}
+                            <button  class="layui-btn layui-btn-sm layui-btn-normal agreeButton fr">点击查看协议</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{#  if (d.data.agreementPass === 1 && d.data.orderStage === 2) { }}
+                <div class="layui-form dis-none"  lay-filter="retreatButton" id="retreat-opertion">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">退单理由</label>
+                        <div class="layui-input-block">
+                            <textarea name="retreatValue" required lay-verify="required" placeholder="请输入退单理由" class="layui-textarea"></textarea>
+                        </div>
+                        <div class="cRed mt-1">*注: 退单会产生罚款3000元，接单完成后如对单价或材料价格有问题请列出清单及时对接工程部经理进行议价</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="tx-right">
+                            <button class="layui-btn layui-btn-sm layui-btn-normal bind-save bgRed" lay-submit  lay-filter="retreatButton">退单</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-normal bind-save cancelButton">取消</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="tx-center" id="retreat-button">
+                    <button class="layui-btn layui-btn-sm layui-btn-normal bind-save retreatButton">接单</button>
+                    <button class="layui-btn layui-btn-sm layui-btn-normal bind-save bgRed">退单</button>
+                </div>
+            {{#  } else if (d.data.orderStage > 2) { }}
+                <div class="cRed mtb-2 tx-center">您已接单完成</div>
+            {{#  } }}
+        </div>
+    </div>
+</script>
+<!-- 图片打印 -->
+<script  id="imgBox-template" type="text/html">
+    <div carousel-item="">
+        <!--startprint-->
+        {{#  layui.each(d, function(index, item){ }}
+            <div class="pa-2 border-box"><img src="{{item}}" width="100%" ></div>
+        {{#  }); }}
+        <!--endprint-->
+    </div>
+</script>

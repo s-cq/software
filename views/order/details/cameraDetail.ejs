@@ -1,0 +1,1084 @@
+
+<% layout('layoutSimple.ejs') -%>
+<div class="rxadmin-contentnav clearfix">
+    <span class="fz-18">摄像头详情</span>
+</div>
+<div class="cu-details">
+    <!-- 基本信息 -->
+    <div id="cameraDetail-render"></div>
+    <!-- 打点 -->
+    <div id="cameraPoint-render"></div>
+    <!-- 指定出库 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>指定出库</span>
+            </div>
+        </div>
+        <div class="clearfix mt-2">
+            <div class="cu-navtab col-2">
+                <ul class="lh-28 cu-navtab__item" id="cameraNav-render"></ul>
+            </div>
+            <div class="cu-card col-21 ml-4" id="cameraContent-render"></div>
+        </div>
+    </div>
+    <!-- 安装 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>安装</span>
+            </div>
+        </div>
+        <div class="clearfix mt-2">
+            <div class="cu-navtab col-2">
+                <ul class="lh-28 cu-navtab__item" id="cameraNav-render1"></ul>
+                </ul>
+            </div>
+            <div class="cu-card col-21 ml-4" id="cameraInstall-render">
+            </div>
+        </div>
+    </div>
+     <!-- 拍照 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>拍照</span>
+            </div>
+        </div>
+        <div class="clearfix mt-2">
+            <div class="cu-navtab col-2">
+                <ul class="lh-28 cu-navtab__item" id="cameraNav-render2"></ul>
+            </div>
+            <div class="cu-card col-21 ml-4" id="cameraPhoto-render"></div>
+            <div class="cu-card col-21 ml-4 dis-none" id="noDate">
+                <span class="cRed mt-2"> 抱歉， 您还没有进行到该步骤</span> 
+            </div>
+        </div>
+    </div>
+    <!-- 解绑 -->
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>解绑</span>
+            </div>
+        </div>
+        <div class="clearfix mt-2">
+            <div class="col-24 ml-4" >
+                <ul id="cameraUntying-render"></ul>
+            </div>
+        </div>
+    </div>
+    <!-- 照片弹框 -->
+    <div id="imgBox-render" class="dis-none"></div>
+</div>
+
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+        var statusName = ['解绑','拍照', '安装', '指定出库', '打点']; // 订单流
+        var timeList = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+        var interTimeList = [30,35,40,45,50,55,60];
+        var cameraNameList = []; // 摄像头名称List
+        var pointId = ''; // 点位ID
+        var orderList = []; // 当前点位所有的List
+        var orderStage = ''
+        getCameraData();
+        getCameraName();
+        // 获取摄像头数据
+        function getCameraData() {
+            // 获取摄像头流
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/findSolutionPerid',
+                type: 'GET',
+                data: { solutionNo: getQueryString('orderCode')},
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        getPointData(result.Body)
+                    }
+                }
+            });
+        }
+        function getPointData (dataInfo) {
+            // 获取打点信息
+            $.ajax({
+                url: 'https://gsgapi.rxjy.com/api/cameraorderstandard/getByOrderCode',
+                type: 'POST',
+                data: JSON.stringify({orderNo: getQueryString('orderno')}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 1) {
+                        // 订单流模板渲染
+                        var getTpl = document.getElementById('cameraDetail-template').innerHTML
+                        var view = document.getElementById('cameraDetail-render');
+                        orderStage = dataInfo.orderStage
+                        var orderDate = {data:dataInfo, time: result.Body.cameraEntity.updateTime, statusList: statusName}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(orderDate, function(html){
+                                view.innerHTML = html;
+                            });
+                        });
+                        // 打点信息显示
+                        var pointgetTpl = document.getElementById('cameraPoint-template').innerHTML
+                        var pointview = document.getElementById('cameraPoint-render');
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(pointgetTpl).render(result.Body.cameraEntity, function(html){
+                                pointview.innerHTML = html;
+                                viewer()
+                            });
+                        });
+                        getOutData()
+                    }
+                }
+            });
+        };
+        // 获取指定出库的信息
+        function getOutData () {
+             $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/getPointByPro',
+                type: 'POST',
+                data: JSON.stringify({order_no: getQueryString('orderno')}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        // 点位信息
+                        orderList = result.Body.orderList
+                        var pointNavgetTpl = document.getElementById('cameraNav-template').innerHTML
+                        var pointNavview = document.getElementById('cameraNav-render');
+                        var pointNavview1 = document.getElementById('cameraNav-render1');
+                        var pointNavview2 = document.getElementById('cameraNav-render2');
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(pointNavgetTpl).render(result.Body, function(html){
+                                pointNavview.innerHTML = html;
+                                pointNavview1.innerHTML = html;
+                                pointNavview2.innerHTML = html;
+                                // 指定出库点击
+                                $('#cameraNav-render.cu-navtab__item li').click(function() {
+                                    var index = $(this).index()
+                                    var carameName = $(this).attr('data-name')
+                                    var cameraId = $(this).attr("data-camera")
+                                    pointId = $(this).attr('data-id')
+                                    $(this).addClass('is-active').siblings().removeClass('is-active')
+                                    $(this).parents('.clearfix').find('#cameraContent-render>div').eq(index).removeClass('dis-none').siblings().addClass('dis-none')
+                                    form.val("saveCameInfo", {
+                                        "cameraPointName": carameName !== "null" ? carameName : '',
+                                    });
+                                    form.val("saveChangeReason", {
+                                        "cameraId": cameraId,
+                                    });
+                                    // select改变(监控名称改变)
+                                    form.on('select(cameraName)', function(data){
+                                        getCameraInfo(data.value, carameName)
+                                    });
+                                    // select改变(开始时间改变)
+                                    form.on('select(cameraBegin)', function(data){
+                                        var formdata = form.val('saveCameInfo');
+                                        if (formdata.cameraEndVlaue !== '' && Number(data.value) >= Number(formdata.cameraEndVlaue)) {
+                                            layer.msg('开始时间不能大于结束时间', {icon: 5});
+                                            form.val("saveCameInfo", {
+                                                "cameraBeginVlaue": ''
+                                            })
+                                        }
+                                    });
+                                    // select改变(结束时间改变)
+                                    form.on('select(cameraEnd)', function(data){
+                                        var formdata = form.val('saveCameInfo');
+                                        if (formdata.cameraBeginVlaue !== '' && Number(data.value) <= Number(formdata.cameraBeginVlaue)) {
+                                            layer.msg('结束时间不能小于开始时间', {icon: 5});
+                                            form.val("saveCameInfo", {
+                                                "cameraEndVlaue": ''
+                                            })
+                                        }
+                                    }); 
+                                })
+                                // 安装点击
+                                $('#cameraNav-render1.cu-navtab__item li').click(function() {
+                                    var currentId = $(this).attr('data-id') // 当前的ID
+                                    pointId = currentId
+                                    var currentInstallStage =  $(this).attr('data-installStage') // 当前的安装状态
+                                    var currentCamera =  $(this).attr('data-camera') // 当前的摄像头ID
+                                    var index = $(this).index()
+                                    $(this).addClass('is-active').siblings().removeClass('is-active')
+                                    getInstallData(currentId,currentCamera, currentInstallStage)
+                                });
+                                //  拍照点击
+                                $('#cameraNav-render2.cu-navtab__item li').click(function() {
+                                    var currentId = $(this).attr('data-id') // 当前的ID
+                                    var currentCamera =  $(this).attr('data-camera') // 当前的摄像头ID
+                                    var currentBeginDate =  $(this).attr('data-beginDate') // 当前的摄像头拍照开始时间
+                                    var currentEndDate =  $(this).attr('data-endDate') // 当前的摄像头拍照结束时间
+                                    var currentTimeDiffer =  $(this).attr('data-timeDiffer') // 当前的时间间隔
+                                    var currentInstallStage =  $(this).attr('data-installStage') // 当前的安装状态
+                                    var currentPointState =  $(this).attr('data-pointState') // 当前的点位状态
+                                    var currentdataStage =  $(this).attr('data-stage') // 当前的总的状态
+                                    var stage = 2 // 0为正常 1为异常 2为停机
+                                    if (Number(currentPointState) === 0  && Number(currentdataStage) === 0) {
+                                        stage = 0
+                                    } else if (Number(currentPointState) === 0  && Number(currentdataStage) === 1) {
+                                        stage = 1
+                                    } else if (Number(currentPointState) === 1) {
+                                        stage = 2
+                                    }
+                                    var photoNumber = (Number(currentEndDate) - Number(currentBeginDate)) * 60 / Number(currentTimeDiffer)
+                                    var index = $(this).index()
+                                    $(this).addClass('is-active').siblings().removeClass('is-active')
+                                    getPhotoInfo(currentId,currentCamera,photoNumber, currentInstallStage,stage)
+                                });
+                            });
+                        });
+                        // 点位内容
+                        var getTpl = document.getElementById('cameraContent-template').innerHTML
+                        var view = document.getElementById('cameraContent-render');
+                        var cameraInfo = {data:result.Body,timeList:timeList,interTimeList:interTimeList,cameraNameList:cameraNameList,orderStage:orderStage}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(cameraInfo, function(html){
+                                view.innerHTML = html;
+                                layui.form.render()
+                                $('#cameraNav-render.cu-navtab__item li').eq(0).click()
+                                $('#cameraNav-render1.cu-navtab__item li').eq(0).click()
+                                $('#cameraNav-render2.cu-navtab__item li').eq(0).click()
+                            });
+                        });
+                        // 解绑数据
+                        var Untyingview = document.getElementById('cameraUntying-render');
+                        var UntyinggetTpl = document.getElementById('cameraUntying-template').innerHTML
+                        var untryData = {data:result.Body,orderStage:orderStage}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(UntyinggetTpl).render(untryData, function(html){
+                                Untyingview.innerHTML = html;
+                                // 点击解绑 解绑
+                                $("#cameraUntying-render .bind-save").click(function() {
+                                    var currentUntyingNumber = 1; // 已经解绑的
+                                    var currnetaAllowUntyingNumber = 0; // 允许解绑的
+                                    var datacamera = $(this).attr('data-camera');
+                                    var dataId = $(this).attr('data-id');
+                                    var dataName = $(this).attr('data-name')
+                                    for(var i=0; i<orderList.length; i++) {
+                                        if (orderList[i].point_state === 1 && orderList[i].camera !== null) {
+                                            currentUntyingNumber += 1
+                                        }
+                                        if (orderList[i].camera !== null) {
+                                            currnetaAllowUntyingNumber  += 1
+                                        }
+                                    }
+                                    var flag = currentUntyingNumber === currnetaAllowUntyingNumber ? true : false
+                                    upCameraStateForPro(datacamera,dataId,dataName,currentUntyingNumber,flag)
+                                })
+                            });
+                        });
+                    }
+                }
+            });
+        }
+        // 获取安装结果的数据
+        function getInstallData(currenyId,currentCamera,currentInstallStage) {
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/selectInstallImgs',
+                type: 'POST',
+                data: JSON.stringify({point_id: currenyId}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        // 安装
+                        var getTpl = document.getElementById('cameraInstall-template').innerHTML
+                        var view = document.getElementById('cameraInstall-render');
+                        var data = {imgList:result.Body, camera: currentCamera,orderStage:orderStage,currentInstallStage:currentInstallStage}
+                        layui.use('laytpl', function(){
+                            var laytpl = layui.laytpl;
+                            laytpl(getTpl).render(data, function(html){
+                                view.innerHTML = '';
+                                view.innerHTML = html;
+                                layui.form.render()
+                                viewer()
+                                $("#photoBox .bind-save").click(function() {
+                                    var cameraId = $(this).attr("data-camera");
+                                    // 抓拍
+                                    submitPhoto(cameraId)
+                                })
+                            });
+                        });
+                    }
+                }
+            });
+        };
+        // 获取拍照的数据
+        function getPhotoInfo (currenyId,currentCamera,photoNumber,currentInstallStage,stage) {
+            if (Number(currentInstallStage) === 1 && currentCamera !== 'null' && currentCamera !== 'undefined') {
+                $("#noDate").hide()
+                $("#cameraPhoto-render").show()
+                $.ajax({
+                    url: 'https://gcs.rxjy.com/api/Project/getPhotoDayByPid',
+                    type: 'POST',
+                    data: JSON.stringify({dayTotal: photoNumber, id:currenyId}),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.StatusCode === 0) {
+                            // 拍照
+                            var getTpl = document.getElementById('cameraPhoto-template').innerHTML
+                            var view = document.getElementById('cameraPhoto-render');
+                            var data = {photoList:result.Body, stage: stage,photoNumber:photoNumber}
+                            layui.use('laytpl', function(){
+                                var laytpl = layui.laytpl;
+                                laytpl(getTpl).render(data, function(html){
+                                    view.innerHTML = '';
+                                    view.innerHTML = html;
+                                    layui.form.render()
+                                    viewer()
+                                    // 点击查看拍照详情
+                                    $(".table-imgbox .openImgButton").click(function() {
+                                        var time = $(this).attr('data-time')
+                                        $.ajax({
+                                            url: 'https://gcs.rxjy.com/api/Project/getImgMapListByDate',
+                                            type: 'POST',
+                                            data: JSON.stringify({create_date: time, point_id:currenyId}),
+                                            contentType: "application/json; charset=utf-8",
+                                            success: function (result) {
+                                                if (result.StatusCode === 0) {
+                                                    // 获取拍照的数据
+                                                    var photogetTpl = document.getElementById('imgBox-template').innerHTML
+                                                    var photoview = document.getElementById('imgBox-render');
+                                                    layui.use('laytpl', function(){
+                                                        var laytpl = layui.laytpl;
+                                                        laytpl(photogetTpl).render(result.Body, function(html){
+                                                            photoview.innerHTML = html;
+                                                            layer.open({
+                                                                type: 1,
+                                                                title: ''+time+'照片列表',
+                                                                shade: 0,
+                                                                area: ['90%', '90%'],
+                                                                skin: 'layui-layer-rim', // 加上边框
+                                                                content: $("#imgBox-render"),
+                                                                zIndex:2013,
+                                                            });
+                                                            viewer()
+                                                        });
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    })
+                                });
+                            });
+                        }
+                    }
+                });
+            } else {
+                $("#noDate").show()
+                $("#cameraPhoto-render").hide()
+            }
+        };
+        // 获取监控名称
+        function getCameraName () {
+            // 获取摄像头流
+            $.ajax({
+                url: 'https://gcs.rxjy.com/group/tacameras/getCamerasInfoByUId',
+                type: 'GET',
+                data: { uid: uid},
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                       cameraNameList = result.Body.sxts
+                    }
+                }
+            });
+        };
+        // 监控名称获取开始时间 结束时间 拍摄间隔
+        function getCameraInfo(cameraId, carameName) {
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/city/cameras/getSauxiliaryInfo',
+                type: 'POST',
+                data: JSON.stringify({camera: cameraId, poi_id: ''}),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        var currentData = result.Body.orderList[0]
+                        form.val("saveCameInfo", {
+                            "cameraPointName": carameName !== "null" ? carameName : '',
+                            "cameraBeginVlaue": currentData.begin_date,
+                            "cameraEndVlaue": currentData.end_data,
+                            "cameraIntervalVlaue": currentData.interval,
+                        })
+                    }
+                }
+            });
+        }
+        viewer()
+        //监听提交(指定出库提交)
+        form.on('submit(saveCameInfo)', function(data){
+            var clickFlag = ''
+            if (clickFlag) {
+                return 
+            }
+            if(data.field.cameraName === '' || data.field.cameraName === null) {
+                layer.msg('请选择监控名称', {icon: 5});
+                return
+            }
+            if(data.field.cameraPointName.replace(/(^\s*)|(\s*)$/g,"") === '') {
+                layer.msg('请输入点位名称', {icon: 5});
+                return
+            }
+            if(data.field.cameraBeginVlaue === '') {
+                layer.msg('请选择开始时间', {icon: 5});
+                return
+            }
+            if(data.field.cameraEndVlaue === '') {
+                layer.msg('请选择结束时间', {icon: 5});
+                return
+            }
+            if(data.field.cameraIntervalVlaue === '') {
+                layer.msg('请选择间隔时间', {icon: 5});
+                return
+            }
+            clickFlag = true
+            // 提交监控名称
+            var params = {
+                camera_state: 1, // 监控状态
+                name:data.field.cameraPointName.replace(/(^\s*)|(\s*)$/g,""), // 点位名称
+                camera: data.field.cameraName, // 监控点编号
+                point_id: pointId, // 点位id
+                region_id: getCookie('areaId'), // 地区id
+                order_no: getQueryString('orderno'), // 单号
+                remark: '项目经理' +  getCookie('userName') + '操作出库', // 备注
+                opereater: getCookie('userName'), // 操作人
+                begin_date: data.field.cameraBeginVlaue, // 开始时间
+                end_data: data.field.cameraEndVlaue, // 结束时间
+                interval: data.field.cameraIntervalVlaue // 时间间隔
+            }
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/upPointAndCamera',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        updataStage(3,'摄像头订单指定出库' )
+                    }
+                }
+            });
+        });
+        // 跳转阶段的接口
+        function updataStage(stage,remark) {
+            // stage 3 安装 4. 拍照 5.解绑 6. 全部解绑
+            var params = {
+                stage: stage,
+                solutionNo: getQueryString('orderCode'),
+                orderNo: getQueryString('orderno'),
+                uid: uid,
+                userName: getCookie('userName'),
+                createName: getCookie('userName'),
+                createNo: uid,
+                fType: 'X14',
+                implementRemark: remark,
+                orderName: '摄像头'
+            }
+            if (stage === 6) {
+                params.orderName = '摄像头';
+                params.accpetanceRemark = '项目的订单已完成';
+                params.updateBy = getCookie('userName');
+                params.updateNo = getCookie('appCardNo');
+            }
+            $.ajax({
+                url: 'https://gpm.rxjy.com/api/project/orderModel/updateOrderStage',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.statusCode === 1) {
+                        layer.msg('操作成功');
+                        getCameraData();
+                        getCameraName();
+                    }
+                }
+            });
+        }
+        // 变更提交
+        form.on('submit(saveChangeReason)', function(data){
+            if(data.field.reasonValue === '') {
+                layer.msg('请输入变更理由', {icon: 5});
+                return
+            }
+            if (data.field.cameraId === '' || data.field.cameraId === 'null') {
+                layer.msg('监控名称为空 无法更改', {icon: 5});
+                return
+            }
+            var params = {
+                camera: data.field.cameraId, // 监控编号
+                name: data.field.reasonValue.replace(/(^\s*)|(\s*)$/g,""), // 名字传空
+                point_id: pointId, // 点位id
+                order_no: getQueryString('orderno'), // 单号
+                region_id: getCookie('areaId'), //
+                remark: '项目经理' + getCookie('userName') + '操作更换点位监控,原因：' + data.field.reasonValue, // 更换原因
+                opereater: getCookie('userName'), // --操作人
+                camera_state: 2 // 出库状态 0 = 库存1 = 已出库 2 = 归库
+            }
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/upPointCamera',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        layer.msg('变更成功');
+                        getCameraData();
+                        getCameraName();
+                    }
+                }
+            });
+        });
+        // 抓拍接口
+        function submitPhoto(camera) {
+            var params = {
+                camera: camera, // 监控点编号
+                region: getCookie('areaId'), // 地区id
+                orderNo:getQueryString('orderno'), // 单号
+                poiId: pointId, // 点位
+                installState: 1 // 安装
+            }
+            $.ajax({
+                url: 'https://gcs.rxjy.com/group/trimgs/addManualCapture',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (Number(result.StatusCode) === 0) {
+                        updateInstallState(camera)
+                    }
+                }
+            });
+        };
+        // 抓拍成功之后的方法
+        function updateInstallState(camera) {
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/updateInstallState',
+                type: 'POST',
+                data: JSON.stringify({point_id:pointId, camera:camera }),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                       updataStage(5,'摄像头订单安装')
+                    }
+                }
+            });
+        };
+        // 解绑
+        function upCameraStateForPro(datacamera,dataId,dataName,flag) {
+            console.log(flag)
+            var params = {
+                camera_state: 2, // 监控状态
+                name: dataName, // 点位名称
+                camera: datacamera, // 监控点编号
+                point_id:dataId, // 点位id
+                region_id: getCookie('areaId'), // 地区id
+                order_no: getQueryString('orderno'), // 单号
+                remark: '项目经理' + getCookie('userName') + '操作出库', // 备注
+                opereater: getCookie('userName') // 操作人
+            }
+            $.ajax({
+                url: 'https://gcs.rxjy.com/api/Project/upPointAndCamera',
+                type: 'POST',
+                data: JSON.stringify(params),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.StatusCode === 0) {
+                        if (flag) {
+                            updataStage(6,'摄像头订单解绑')
+                        } else {
+                            layer.msg('操作成功');
+                        }
+                    }
+                }
+            });
+        }
+    })
+</script>
+<!-- 基本信息 -->
+<script  id="cameraDetail-template" type="text/html">
+    <div class="clearfix cu-card ptb-8">
+        <div class="col-8 tx-center pt-2 bor-dotted-right">
+            <p class="fz-16 mt-2 cLightGray">
+                <span>订单号&nbsp;:</span>
+                <span>{{d.data.orderCode}}</span>
+            </p>
+            <p class="fz-20 fw-bold cLightRed mtb-4">
+                <span class="fw-bold">订单状态&nbsp;:</span>
+                <span class="fw-bold">&nbsp;{{getStage(d.data.orderCode, d.data.orderStage)}}</span>
+            </p>
+            <div>
+                <img class="bor-rad50" src="{{getCookie('photo')}}" width="85px" height="85px" alt="">
+                <p class="fz-20 fw-bold mt-3">{{d.data.userName}}</p>
+                <p class="fz-16 mt-3 cOrange">订单名称：摄像头</p>
+                <p class="fz-16 mt-3">地区: {{d.data.dqName}}</p>
+            </div>
+        </div>
+        <div class="col-16">
+            {{#  if(Number(d.data.orderStage) === 6){ }}
+                <div class="col-24 mb-6 tx-center fz-14 cLightGray">该订单已经完成,请关注其他订单,要加油哟！</div>
+            {{#  } }}
+            <div class="col-24">
+                <ul class="layui-timeline col-24">
+                    {{#  layui.each(d.statusList, function(index, item){ }}
+                    <li class="clearfix pl-4">
+                        <div class="col-7 fz-12 lh-22 ">
+                            <span class="fr mr-2"> 
+                                {{# if(item === '打点'){ }}
+                                    {{d.time}}
+                                {{#  } else { }}
+                                    暂无时间
+                                {{#  } }}
+                            </span>
+                        </div>
+                        <ul class="fl">
+                            <li class="layui-timeline-item">
+                                {{#  if(item === '打点'){ }}
+                                    {{#  if( Number(d.data.orderStage) ===  1){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage)  >  1){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                    <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                {{#  } else if (item === '指定出库'){ }}
+                                    {{#  if(Number(d.data.orderStage) ===  2){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage)  >  2){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } else if (item === '安装'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 3 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 3){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  } else if (item === '拍照'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 4 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 4){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{#  }  else if (item === '解绑'){ }}
+                                    {{#  if(Number(d.data.orderStage) === 5 ){ }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio"></i>
+                                    {{#  } else if (Number(d.data.orderStage) > 5){ }}
+                                        <i class="layui-icon layui-timeline-axis cLightRed layui-icon-ok-circle"></i>
+                                    {{#  }  else { }}
+                                        <i class="layui-icon layui-timeline-axis layui-icon-radio cLightGray"></i>
+                                    {{#  }  }}
+                                {{# } }}
+                                <div class="layui-timeline-content layui-text">
+                                    <h3 class="layui-timeline-title fz-14 fw-bold">{{item}}</h3>
+                                    <p class="fz-12">订单：
+                                        {{#  if (item === '打点') { }}
+                                            {{d.data.orderCode}} {{Number(d.data.orderStage) > 1 ? '已于'+formateDate(d.time)+'打点完成':'等待打点'}}
+                                        {{#  } else if (item === '指定出库') { }}
+                                            {{d.data.orderCode}}{{Number(d.data.orderStage) > 2 ?'已执行完':'等待出库'}}
+                                        {{#  } else if (item === '安装'){ }}
+                                            {{d.data.orderCode}}{{Number(d.data.orderStage) > 3 ?'已执行完':'等待安装'}}
+                                        {{#  } else if (item === '拍照'){ }}
+                                            {{d.data.orderCode}}{{Number(d.data.orderStage) > 4 ?'已执行完':'等待拍照'}}
+                                        {{#  } else if (item === '解绑'){ }}
+                                            {{d.data.orderCode}}{{Number(d.data.orderStage) > 5 ?'已执行完':'等待解绑'}}
+                                        {{#  } }}
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    {{#  }); }}
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- 打点 -->
+<script  id="cameraPoint-template" type="text/html">
+    <div class="cu-card mt-4">
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                <span>打点</span>
+            </div>
+        </div>
+        <div class="cu-card__main ml-2">
+             <table class="layui-table mt-0">
+                <thead>
+                    <tr>
+                        <th class="tx-center">区域</th>
+                        <th class="tx-center">点位</th>
+                        <th class="tx-center">点位图</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#  if(d.pointMapDetails.length > 0){ }}
+                        {{#  layui.each(d.pointMapDetails.split(','), function(index, item){ }}
+                            <tr>
+                                <td class="tx-center">{{item.split('-')[0]}}</td>
+                                <td class="tx-center">{{item.split('-')[1]}}</td>
+                                {{#  if(index === 0){ }}
+                                    <td rowspan="{{d.pointMapDetails.length}}">
+                                        <ul class="cu-upload-list viewer-images">
+                                            <li class="cu-upload-list__item">
+                                                <img class="cu-upload-list__item-thumbnail" width="140px" height="120px" src="{{d.pointMap}}">
+                                            </li>
+                                        </ul>
+                                    </td>
+                                {{#  } }}
+                            </tr>
+                        {{#  }); }}
+                    {{#  } }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</script>
+<!--指定出库 -->
+<script  id="cameraNav-template" type="text/html">
+    {{#  layui.each(d.orderList, function(index, item){ }}
+        <li class="{{index === 0 ? 'is-active' : ''}}" data-id="{{item.id}}" data-name="{{item.name}}" data-camera="{{item.camera}}" data-beginDate="{{item.begin_date}}" data-endDate="{{item.end_data}}" data-timeDiffer="{{item.timeDiffer}}" data-installStage="{{item.install_state}}" data-pointState="{{item.point_state}}" data-stage="{{item.state}}">
+            <span class="pl-2">{{item.name === null ?  '点位'+(index+1) : item.name}}</span>
+            <span class="cu-navtab__triangle"></span>
+        </li>
+    {{#  }); }}
+</script>
+<!--指定出库信息 -->
+<script  id="cameraContent-template" type="text/html">
+    {{#  layui.each(d.data.orderList, function(index, item){ }}
+        {{#  if(item.camera === null || item.camera === undefined ){ }}
+            <div class="dis-none">
+                 <div class="layui-form"  lay-filter="saveCameInfo">
+                    <div class="cu-card__title  mb-1">
+                        <div class="cu-card__inner">
+                        <i class="cu-card__line"></i>
+                            <span>指定出库</span>
+                        </div>
+                    </div>
+                    <div class="layui-form-item form-inline col-8">
+                        <label class="layui-form-label">监控名称</label>
+                        <div class="layui-input-block">
+                            <div id="worker-render"  class="col-22">
+                                <select name="cameraName" lay-filter="cameraName" required>
+                                    <option value=""></option>
+                                    {{#  layui.each(d.cameraNameList, function(index, itemValue){ }}
+                                        <option value="{{itemValue.camera}}">{{itemValue.card}}</option>
+                                    {{#  }); }}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item  form-inline col-8">
+                        <label class="layui-form-label">点位名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="cameraPointName" required  lay-verify="required" placeholder="请输入点位名称" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item  form-inline col-8">
+                        <label class="layui-form-label">开始时间</label>
+                        <div class="layui-input-block">
+                            <div class="col-22">
+                                <select name="cameraBeginVlaue" lay-filter="cameraBegin"  required>
+                                    <option value=""></option>
+                                    {{#  layui.each(d.timeList, function(index, itemValue){ }}
+                                        <option value="{{itemValue}}">{{itemValue}}点</option>
+                                    {{#  }); }}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item  form-inline col-8">
+                        <label class="layui-form-label">结束时间</label>
+                        <div class="layui-input-block">
+                            <div class="col-22">
+                                <select name="cameraEndVlaue" lay-filter="cameraEnd" required >
+                                    <option value=""></option>
+                                    {{#  layui.each(d.timeList, function(index, itemValue){ }}
+                                        <option value="{{itemValue}}">{{itemValue}}点</option>
+                                    {{#  }); }}
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="layui-form-item  form-inline col-8">
+                        <label class="layui-form-label">拍摄间隔</label>
+                        <div class="layui-input-block">
+                            <div class="col-22">
+                                <select name="cameraIntervalVlaue" lay-filter="cameraInterval"  id="cameraInterval" required >
+                                    <option value=""></option>
+                                    {{#  layui.each(d.interTimeList, function(index, itemValue){ }}
+                                        <option value="{{itemValue}}">{{itemValue}}分</option>
+                                    {{#  }); }}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="tx-right">
+                            <button class="layui-btn layui-btn-sm layui-btn-normal bind-save" lay-submit  lay-filter="saveCameInfo">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{#  } else { }}
+            <div class="dis-none">
+                <div class="cu-card__title">
+                    <div class="cu-card__inner">
+                    <i class="cu-card__line"></i>
+                        <span>指定出库</span>
+                    </div>
+                </div>
+                <div class="clearfix mtb-1 ml-2">
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">点位名称</span> 
+                        <span>{{item.name}}</span>
+                    </p>
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">监控名称</span> 
+                        <span>{{item.card}}</span>
+                    </p>
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">绑定时间</span> 
+                        <span>{{item.update_date}}</span>
+                    </p>
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">开始时间</span> 
+                        <span>{{item.begin_date}}点</span>
+                    </p> 
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">结束时间</span> 
+                        <span>{{item.end_data}}点</span>
+                    </p>
+                    <p class="col-8 mtb-1">
+                        <span class="cLightGray pr-1">时间间隔</span> 
+                        <span>{{item.timeDiffer}}分钟</span>
+                    </p>
+                </div>
+                {{#  if(Number(d.orderStage) < 6 ){ }}
+                    <div class="layui-form"  lay-filter="saveChangeReason">
+                        <div class="cu-card__title">
+                            <div class="cu-card__inner">
+                            <i class="cu-card__line"></i>
+                                <span>变更理由</span>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">理由</label>
+                            <div class="layui-input-block">
+                                <textarea name="reasonValue" required lay-verify="required" placeholder="请输入变更理由" class="layui-textarea"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item dis-none">
+                            <div class="layui-input-block">
+                                <input type="text" name="cameraId" required  lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="tx-right">
+                                <button class="layui-btn layui-btn-sm layui-btn-normal bind-save" lay-submit  lay-filter="saveChangeReason">变更</button>
+                            </div>
+                        </div>
+                    </div>
+                {{#  } }}
+            </div>
+        {{#  } }}
+    {{#  }); }}
+</script>
+<!--安装 -->
+<script  id="cameraInstall-template" type="text/html">
+    <span>{{}}</span>
+    {{#  if(d.camera !== "null" && d.camera !== "undefined" && Number(d.currentInstallStage) === 0){ }}
+        <div id="photoBox">
+            <div class="cu-card__title">
+                <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                    <span>抓拍</span>
+                </div>
+            </div>
+            <div class="clearfix">
+                <div class="cRed mtb-1 ml-2 fl">抓拍一张图片证明已安装成功</div>
+                <div class="tx-right">
+                    {{#  if(Number(d.orderStage) === 3 ){ }}
+                        <button class="layui-btn layui-btn-sm layui-btn-normal bind-save"  data-camera="{{d.camera}}">抓拍</button>
+                    {{#  } }}
+                </div> 
+            </div>
+        </div>
+    {{#  } }}
+    <div>
+        <div class="cu-card__title">
+            <div class="cu-card__inner">
+            <i class="cu-card__line"></i>
+                <span>结果</span>
+            </div>
+        </div>
+        {{#  if(d.camera === "null" || d.camera === "undefined" ){ }}
+            <div class="cRed mt-2 ml-2">请先去指定出库中绑定一个摄像头</div>
+        {{#  } else { }}
+            <ul class="cu-upload-list fl ml-2 mt-2 viewer-images">
+                {{#  layui.each(d.imgList.installImgs, function(index, item){ }}
+                    <li class="cu-upload-list__item  fl">
+                        <img class="cu-upload-list__item-thumbnail" width="140px" height="150px"  src="{{item.img_url}}">
+                    </li>
+                {{#  }); }}
+            </ul>
+            {{# if( Number(d.currentInstallStage) === 0){ }}
+               <div class="cRed fr">未安装</div>
+            {{#  } else { }}
+               <div class="cGreen fr">已安装</div>
+            {{#  } }}
+        {{#  } }}
+    </div>
+</script>
+<!--拍照 -->
+<script  id="cameraPhoto-template" type="text/html">
+    {{#  if(d.photoList.photoDays.length > 0 ){ }}
+        <div>
+            <div class="cu-card__title">
+                <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                    <span>状态</span>
+                </div>
+            </div>
+            <div class="clearfix ml-2">
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">最后通信</span> 
+                    <span>{{d.photoList.photoDays[0].maxDay}}</span>
+                </p>
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">最后拍照</span> 
+                    <span>{{d.photoList.photoDays[0].maxDay}}</span>
+                </p>
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">最后上传</span> 
+                    <span>{{d.photoList.photoDays[0].maxDay}}</span>
+                </p>
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">通讯状态</span> 
+                    <span class="{{Number(d.stage) === 0 ? 'cGreen' : Number(d.stage) === 1 ? 'cOrange' : 'cRed' }}">{{Number(d.stage) === 0 ? '正常' : Number(d.stage) === 1 ? '异常' : '停机' }}</span>
+                </p>
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">拍照状态</span> 
+                    <span class="{{Number(d.stage) === 0 ? 'cGreen' : Number(d.stage) === 1 ? 'cOrange' : 'cRed' }}">{{Number(d.stage) === 0 ? '正常' : Number(d.stage) === 1 ? '异常' : '停机' }}</span>
+                </p>
+                <p class="col-8 mtb-1">
+                    <span class="cLightGray pr-1">上传状态</span> 
+                    <span class="{{Number(d.stage) === 0 ? 'cGreen' : Number(d.stage) === 1 ? 'cOrange' : 'cRed' }}">{{Number(d.stage) === 0 ? '正常' : Number(d.stage) === 1 ? '异常' : '停机' }}</span>
+                </p>
+            </div>
+        </div>
+        <div class="table-imgbox">
+            <div class="cu-card__title  mt-2">
+                <div class="cu-card__inner">
+                <i class="cu-card__line"></i>
+                    <span>照片</span>
+                </div>
+            </div>
+            <table class="col-11 layui-table ml-4 mb-0">
+                <thead>
+                    <tr>
+                        <th class="tx-center" width="25%">日期</th>
+                        <th class="tx-center" width="15%">应拍</th>
+                        <th class="tx-center" width="15%">实拍</th>
+                        <th class="tx-center" width="15%">占比</th>
+                        <th class="tx-center" width="15%">状态</th>
+                        <th class="tx-center" width="15%">操作</th>
+                    </tr>
+                </thead>
+            </table>
+            <table class="col-11 layui-table col-offset-1 mb-0">
+                <thead>
+                    <tr>
+                        <th class="tx-center" width="25%">日期</th>
+                        <th class="tx-center" width="15%">应拍</th>
+                        <th class="tx-center" width="15%">实拍</th>
+                        <th class="tx-center" width="15%">占比</th>
+                        <th class="tx-center" width="15%">状态</th>
+                        <th class="tx-center" width="15%">操作</th>
+                    </tr>
+                </thead>
+            </table>
+            <table class="col-11 layui-table ml-4 mt-0">
+                <tbody>
+                    {{#  layui.each(d.photoList.photoDays, function(index, item){ }}
+                        {{# if((index+1)%2 === 1 ){ }}
+                            <tr>
+                                <td class="tx-center" width="25%">{{item.photoYear}}-{{item.photoMonth}}-{{item.photoDay}}</td>
+                                <td class="tx-center" width="15%">{{d.photoNumber}}</td>
+                                <td class="tx-center" width="15%">{{item.dayCount}}</td>
+                                <td class="tx-center cOrange" width="15%">{{item.dayRate}}%</td>
+                                <td class="tx-center" width="15%">
+                                    <span class="{{d.photoNumber === item.dayCount ? 'cGreen' : 'cRed' }}">{{d.photoNumber === item.dayCount ? '正常' : '异常' }}</span>
+                                </td>
+                                <td class="tx-center" width="15%">
+                                    <span class="cBlue pointer openImgButton" data-time="{{item.photoYear}}-{{item.photoMonth}}-{{item.photoDay}}">查看</span>
+                                </td>
+                            </tr>
+                        {{# } }}
+                    {{#  }); }}
+                </tbody>
+            </table>
+            {{# if(d.photoList.photoDays.length > 1 ){ }}
+                <table class="col-11 layui-table col-offset-1 mt-0">
+                    <tbody>
+                        {{#  layui.each(d.photoList.photoDays, function(index, item){ }}
+                            {{# if((index+1)%2 !== 1 ){ }}
+                                <tr>
+                                    <td class="tx-center" width="25%">{{item.photoYear}}-{{item.photoMonth}}-{{item.photoDay}}</td>
+                                    <td class="tx-center" width="15%">{{d.photoNumber}}</td>
+                                    <td class="tx-center" width="15%">{{item.dayCount}}</td>
+                                    <td class="tx-center  cOrange" width="15%">{{item.dayRate}}%</td>
+                                    <td class="tx-center" width="15%">
+                                        <span class="{{d.photoNumber === item.dayCount ? 'cGreen' : 'cRed' }}">{{d.photoNumber === item.dayCount ? '正常' : '异常' }}</span>
+                                    </td>
+                                    <td class="tx-center" width="15%">
+                                        <span class="cBlue pointer openImgButton" data-time="{{item.photoYear}}-{{item.photoMonth}}-{{item.photoDay}}">查看</span>
+                                    </td>
+                                </tr>
+                            {{# } }}
+                        {{#  }); }}
+                    </tbody>
+                </table>
+            {{# } }}
+        </div>
+    {{#  } else { }}
+        <div class="tx-center mt-2">
+            <img width="200" src="/images/nodata.jpg" alt="">
+        </div>
+    {{#  }}}
+</script>
+<!--照片列表 -->
+<script  id="imgBox-template" type="text/html">
+    <ul class="cu-upload-list ptb-3 plr-3 viewer-images" >
+        {{#  layui.each(d.days, function(index, item){ }}
+            <li class="cu-upload-list__item">
+                <img class="cu-upload-list__item-thumbnail" width="140px" height="150px" src="{{item.img_url}}">
+                <span class="cu-upload-list__item-name">{{item.photoHour}}:{{item.photoMinute}}</span>
+            </li>
+        {{#  }); }}
+    </ul>
+</script>
+<!--解绑 -->
+<script  id="cameraUntying-template" type="text/html">
+    {{#  layui.each(d.data.orderList, function(index, item){ }}
+        <li class="clearfix mt-2 ">
+            <span class="fl">{{item.name === null ?  '点位'+(index+1) : item.name}}</span>
+            {{# if(Number(item.point_state) === 0  && Number(d.orderStage) === 5 && item.camera !== null){ }}
+                <div class="tx-right mr-8">
+                    <button class="layui-btn layui-btn-sm layui-btn-normal bind-save" data-camera="{{item.camera}}" data-name="{{item.name}}" data-id="{{item.id}}">解绑</button>
+                </div>
+            {{# } }}
+        </li>
+    {{#  }); }}
+</script>
+

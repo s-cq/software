@@ -1,0 +1,119 @@
+<% layout('projectlayout.ejs') -%>
+
+<div class="pj__left">
+    <ul class="rxadmin-contentnav clearfix">
+        <li><a  data-modelType="4">人工</a></li>
+        <li><a data-modelType="5">材料</a></li>
+        <li><a data-modelType="3">质量</a></li>
+        <li><a data-modelType="1">现场</a></li>
+        <li><a class="active" data-modelType="0">管理</a></li>
+    </ul>
+    <div id="view"></div>
+</div>
+<script>
+    // 初始化页面判断
+    $(function() {
+        var preaMent =  $('.rxadmin-contentnav li .active').text()
+        if (preaMent == '管理') {
+            lodas(0)
+        }
+    })
+    // 头部样式
+    $('.rxadmin-contentnav li a').click(function () {
+        $(this).addClass('active').parent().siblings().children().removeClass('active')
+        lodas($(this).attr("data-modelType"))
+    })
+    // 获取数据
+    function lodas(val){
+        let modelType =$(this).attr("data-modelType")
+      if(getCookie("userName")===undefined || getCookie("userName")===null || getCookie("userName")===''){
+        window.location.href= 'login'
+      }
+      var list = {
+        orderNo ,
+        uid,//项目经理uid
+        typeValue : '',//类型名称  如X11 (整改)
+        stage : getQueryString('id')==999?'':getQueryString('id'),//订单状态  0 发起 1执行 2验收
+        modelType : val,//大类  0管理 1现场
+      }
+      $.ajax({
+            //请求方式
+            type : "GET",
+            url : "https://gpm.rxjy.com/api/project/orderModel/findOrderModelByOrderNo",
+            data : list,
+            success : function(result) {
+                
+                console.log(result,454);
+                var getTpl = demo.innerHTML
+                ,view = document.getElementById('view');
+                layui.use('laytpl', function(){
+                  var laytpl = layui.laytpl;
+                  laytpl(getTpl).render(result, function(html){
+                    view.innerHTML = html;
+                  });
+                })
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status,1111);
+                console.log(e.responseText,11111);
+            }
+        });
+    }
+  </script>
+
+
+<script>
+    // getactive($(".rxadmin-contentnav a"),"active")
+    // 时间格式
+    function formateDate (datetime) {
+            if (datetime=== null || datetime=== '') {
+                    return '--'
+                } else {
+                function addDateZero (num) {
+                    return (num < 10 ? '0' + num : num)
+                }
+                let d = new Date(datetime)
+                let formatdatetime = d.getFullYear() + '-' + addDateZero(d.getMonth() + 1) + '-' + addDateZero(d.getDate()) + ' ' + addDateZero(d.getHours()) + ':' + addDateZero(d.getMinutes()) + ':' + addDateZero(d.getSeconds())
+                return formatdatetime}
+            }
+</script>
+
+<script id="demo" type="text/html">
+  <ul>
+  {{#  layui.each(d.Body, function(index, item){ }}
+    <li class="cu-panel mt-2">
+        <div class="cu-panel mt-2">
+            <div class="cu-panel__title">
+              <p class="fl">
+                <span class="cLightGray pr-1">订单号</span>
+                <span>{{item.orderCode===null?'':item.orderCode}}</span>
+              </p>
+              <!--<p class="fr ml-8"><i class="layui-icon pointer bind-delete layui-icon-delete">&#xe640;</i></p>-->
+              <p class="fr">
+                    {{item.createTime===null?'':formateDate(item.createTime)}}
+              </p>
+            </div>
+            <div class="cu-panel__main is-not-border tx-center lh-26">
+              <div class="cu-panel__split col-4">
+                {{item.orderName}}
+              </div>
+              <div class="cu-panel__split col-8 tx-left">
+                {{item.proName===null?'':item.proName}}
+              </div>
+              <div class="cu-panel__split col-6">{{tfstageDiy(item.orderStage)}}</div>
+              <div class="cu-panel__split col-6 fz-14">
+                <a class="cBlue" target="_blank" href="/enterOrder">进入订单</a>
+              </div>
+            </div>
+          </div>
+    </li>
+  {{#  }); }}
+  {{#  if(d.Body.length === 0){ }}
+    <div class="tx-center">
+        <img width="500" src="/images/nodata.jpg" alt="">
+    </div>
+  {{#  } }} 
+  </ul>
+</script>
+

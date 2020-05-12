@@ -1,0 +1,399 @@
+<div class="pj__right">
+    <div class="cu-card">
+      <div class="cu-card__title">
+        <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">我的</span>
+          
+        </div>
+        <a class="fr cRed pdmlink" href="/pdm/cognition" >待完善</a>
+      </div>
+      <div class="cu-card__main">
+        <div class="cu-table-layout bind-choice-design">
+          <div class="cu-table-layout__cell col-10">
+            <img width="85px" height="85px" src="/public/images/noPerson.png" alt="" id="personImg">
+          </div>
+          <div class="cu-table-layout__cell col-14 lh-24 is-top" id="user">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cu-card mt-4">
+      <div class="cu-card__title">
+        <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">常用功能</span>
+        </div>
+      </div>
+      <ul class="cu-card__main tx-center server-nav-type" id="rxIcon-render">
+            <!-- <li class="col-8 mb-1 is-2">
+                <a href="/CommonProblem/tool">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">工具</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-3">
+                <a href="/CommonProblem/ranking">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">排行</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-4">
+                <a href="/CommonProblem/activity">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">活动</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-5">
+                <a href="/CommonProblem/information">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">消息</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-6">
+                <a href="">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">订单</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-7">
+                <a href="/CommonProblem/team">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">团队</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-8">
+                <a href="/CommonProblem/integral">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">积分</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-9">
+                <a href="/CommonProblem/achievement">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">成就</p>
+                </a>
+            </li>
+            <li class="col-8 mb-1 is-10">
+                <a href="/CommonProblem/level">
+                    <span class="server-nav-type__icon"></span>
+                    <p class="lh-30">级别</p>
+                </a>
+            </li> -->
+      </ul>
+    </div>
+    
+     <div class="cu-card mt-4">
+      <div class="cu-card__title">
+        <div class="cu-card__inner">
+          <i class="cu-card__line"></i>
+          <span class="">瑞祥新闻</span>
+        </div>
+      </div>
+      <div>
+        <ul id="newlist"></ul>
+      </div>
+    </div> 
+</div>
+
+<script id="usertpl"  type="text/html">
+  <p><span class="cLightGray pr-2">岗位</span><span>项目经理</span></p>
+  <p><span class="cLightGray pr-2">姓名</span><span>{{getCookie('userName')}}</span></p>
+  <p><span class="cLightGray pr-2">级别</span><span>{{getCookie('userLevel')}}</span></p>
+  <p><span class="cLightGray pr-2">电话</span><span>{{getCookie('mobile')}}</span></p>
+</script>
+<script id="rxnews" type="text/html">
+    <ul>
+    {{#  layui.each(d.body, function(index, item){ }}
+      <li class="mt-2"><a target="_blank" href="https://tsharp.rxjy.com/news/article.html?id={{item.id}}&cardNo="> {{item.title}}</a><span></span></li>
+    {{#  }); }}
+    {{#  if(d.body.length === 0){ }}
+      无数据
+    {{#  } }} 
+    </ul>
+</script>
+<script id="rxIcon-template" type="text/html">
+  {{#  layui.each(d.list,function(index, item){ }}
+    <li class="{{item.class}} col-8 mb-1 {{d.currentRoute.indexOf(item.link) !== -1 && item.link !== '' ? 'active' : ''}}">
+        <a href="{{item.link}}">
+            <span class="server-nav-type__icon"></span>
+            <p class="lh-30">{{item.name}}</p>
+        </a>
+    </li>
+  {{#  }); }}
+  {{#  if(d.list.length === 0){ }}
+    无数据
+  {{#  } }} 
+</script>
+<script>
+    var findStIdObj = {}
+    var findStagInfo ={}
+    var basicInfo = {isPerfect: true}
+    var imgList = {
+                isPerfect: true,
+                list: [{
+                    key: 57,
+                    name: '证件正面',
+                    url: ''
+                },
+                {
+                    key: 58,
+                    name: '证件反面',
+                    url: ''
+                },
+                {
+                    key: 56,
+                    name: '学历',
+                    url: ''
+                },
+                {
+                    key: 4,
+                    name: '身份证正面',
+                    url: ''
+                }, {
+                    key: 8,
+                    name: '身份证反面',
+                    url: ''
+                },
+                {
+                    key: 36,
+                    name: '形象照',
+                    url: ''
+                }, {
+                    key: 41,
+                    name: '艺术照',
+                    url: ''
+                },
+                {
+                    key: 9,
+                    name: '银行卡正面',
+                    url: ''
+                }, {
+                    key: 11,
+                    name: '银行卡反面',
+                    url: ''
+                }]
+            }
+    // 获取用户信息
+    findUserByCookie()
+        // 获取头像
+        if (!getCookie('photo') === '' || !(getCookie('photo') === null)) {
+          $('#personImg').attr('src', getCookie('photo'))
+        }
+        function findUserByCookie(){
+          var userTpl = usertpl.innerHTML;
+          var userview = document.getElementById('user');
+          var result2=[]
+            layui.use('laytpl', function(){
+              var laytpl = layui.laytpl;
+              laytpl(userTpl).render(result2, function(html){
+                userview.innerHTML = html;
+              });
+            })
+        }
+    $(function(){
+      getIconInfo()
+      // 设置常用常用功能数据
+      function getIconInfo() {
+        var currentHref = window.location.href
+       
+        var iconList = {
+            currentRoute: currentHref,
+            list: [{
+                name: '工具',
+                link: '/CommonProblem/tool',
+                class: 'is-2'
+              },
+              {
+                name: '排行',
+                link: '/CommonProblem/ranking',
+                class: 'is-3'
+              },
+              {
+                name: '活动',
+                link: '/CommonProblem/activity',
+                class: 'is-4'
+              },
+              {
+                name: '消息',
+                link: '/CommonProblem/information',
+                class: 'is-5'
+              },
+              {
+                name: '订单',
+                link: '',
+                class: 'is-6'
+              },
+              {
+                name: '团队',
+                link: '/CommonProblem/team',
+                class: 'is-7'
+              },
+              {
+                name: '积分',
+                link: '/CommonProblem/integral',
+                class: 'is-8'
+              },
+              {
+                name: '成就',
+                link: '/CommonProblem/achievement',
+                class: 'is-9'
+              },
+              {
+                name: '级别',
+                link: '/CommonProblem/level',
+                class: 'is-10'
+              }
+          ]};
+        var getTpl = document.getElementById('rxIcon-template').innerHTML;
+        var view = document.getElementById('rxIcon-render');
+        layui.use('laytpl', function(){
+          var laytpl = layui.laytpl;
+          laytpl(getTpl).render(iconList, function(html){
+            view.innerHTML = html;
+          });
+        })
+      }
+      // 获取瑞祥新闻页面
+      $.ajax({
+            //请求方式
+            type : "get",
+            url : "https://tsharp.rxjy.com/a/rx/rxNews/getNewsListByGroupId?groupId=6&page=1&rows=10",
+            success : function(result) {
+                var getTpl = rxnews.innerHTML
+                var view = document.getElementById('newlist');
+                layui.use('laytpl', function(){
+                  var laytpl = layui.laytpl;
+                  laytpl(getTpl).render(result, function(html){
+                    view.innerHTML = html;
+                  });
+                })
+            },
+            //请求失败，包含具体的错误信息
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+    findStIdByUid()
+    function findStIdByUid() {
+        $.ajax({
+          type: 'get',
+          url: 'https://gxmrs.rxjy.com/api/ProjectRecruit/findStIdByUid',
+          data: { uid: uid },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            findStIdObj = result.Body;
+            GetAppUserInfo()
+            findStageInfoById()
+
+          }
+        });
+    };
+    function findStageInfoById() {
+        $.ajax({
+            type: 'get',
+            url: 'https://gxmrs.rxjy.com/api/ProjectRecruit/findStageInfoById',
+            data: { uid: uid },
+        }).done(result => {
+            if (result.StatusCode === 0) {
+                findStagInfo = result.Body
+            }
+        });
+    }
+        /**
+       * 查询详情信息
+       */
+    function GetAppUserInfo(){
+        $.ajax({
+          type: 'post',
+          url: 'https://piapi.rxjy.com/actionapi/AppPreUser/GetAppUserInfo',
+          data: { post: '4', appid: findStIdObj.rsAppId },
+        }).done(result => {
+          if (result.StatusCode === 0) {
+            var GetAppUserList = result.Body[0];
+            StageInfoById(GetAppUserList)
+          }
+        });
+      };
+    })
+    
+    function StageInfoById(userInfo) {
+        // 获取其他信息
+        $.ajax({
+          type: 'post',
+          url: 'https://piapi.rxjy.com/actionapi/AppPreUser/GetAppUserInfo',
+          data: { post: '4', appid: findStIdObj.rsAppId },
+        }).done(result => {
+                if (result.StatusCode === 0) {
+                    const userDetailInfo = result.Body[0]
+                    // 基本信息
+                    basicInfo.u_name = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('u_name') ? userInfo.u_name === '' ? '--' : userInfo.u_name : '--'
+                    basicInfo.sex = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('sex') ? userInfo.sex : '--'
+                    basicInfo.phone = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('phone') ? userInfo.phone === '' ? '--' : userInfo.phone : '--'
+                    basicInfo.weixin = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('weixin') ? userInfo.weixin === '' ? '--' : userInfo.weixin : '--'
+                    basicInfo.create_date = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('create_date') ? userInfo.create_date : '--'
+                    basicInfo.education = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('education') ? findStagInfo.education === '' ? '--' : findStagInfo.education : '--'
+                    basicInfo.is_marry = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('is_marry') ? findStagInfo.is_marry : '--'
+                    basicInfo.age = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('age') ? findStagInfo.age : '--'
+                    // basicInfo.inductionDate = userDetailInfo !== null && userDetailInfo !== undefined && userDetailInfo.hasOwnProperty('inductionDate') ? userDetailInfo.inductionDate === '' ? '--' : userDetailInfo.inductionDate : '--'
+                    // 家庭关系
+                    basicInfo.family_name = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('family_name') ? findStagInfo.family_name === '' ? '--' : findStagInfo.family_name : '--'
+                    basicInfo.family_relation = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('family_relation') ? findStagInfo.family_relation === '' ? '--' : findStagInfo.family_relation : '--'
+                    basicInfo.family_phone = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('family_phone') ? findStagInfo.family_phone === '' ? '--' : findStagInfo.family_phone : '--'
+                    basicInfo.family_wechat = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('family_wechat') ? findStagInfo.family_wechat === '' ? '--' : findStagInfo.family_wechat : '--'
+                    basicInfo.family_sex = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('family_sex') ? findStagInfo.family_sex : '--'
+                    // 地区
+                    basicInfo.u_shi = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('u_shi') ? userInfo.u_shi === '' ? '--' : userInfo.u_shi : '--'
+                    basicInfo.region_name = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('region_name') ? userInfo.region_name === '' ? '--' : userInfo.region_name : '--'
+                    basicInfo.address = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('address') ? findStagInfo.address === '' ? '--' : findStagInfo.address : '--'
+                    // 实力
+                    basicInfo.u_isjingyan = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('u_isjingyan') ? userInfo.u_isjingyan === '' ? '--' : userInfo.u_isjingyan : '--'
+                   // basicInfo.represent_indeed = userDetailInfo !== null && userDetailInfo !== undefined && userDetailInfo.hasOwnProperty('represent_indeed') ? userInfo.represent_indeed : '--'
+                   
+                    // 银行卡信息
+                    basicInfo.userName = userInfo !== null && userInfo !== undefined && userInfo.hasOwnProperty('u_name') ? userInfo.u_name === '' ? '--' : userInfo.u_name : '--'
+                    basicInfo.bankName = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('bank_name') ? findStagInfo.bank_name === '' ? '--' : findStagInfo.bank_name : '--'
+                    basicInfo.bankAccount = findStagInfo !== null && findStagInfo !== undefined && findStagInfo.hasOwnProperty('bank_account') ? findStagInfo.bank_account === '' ? '--' : findStagInfo.bank_account : '--'
+                    basicInfo.isPerfect = true
+                    for (const key in basicInfo) {
+                        if (basicInfo[key] === '--' || basicInfo[key] === '') {
+                            basicInfo.isPerfect = false
+                        }
+                    }
+                    getUserListinfoPhoto()
+                }
+            })
+    }
+
+    function getUserListinfoPhoto(){
+        $.ajax({
+            type: 'get',
+            url: 'https://gxmrs.rxjy.com/api/ProjectManager/getUserListinfoPhoto',
+            data: {uid: uid},
+        }).done(res =>{
+            if (res.StatusCode === 0) {
+                const userInfoPhoto = res.Body
+                // 图片信息
+                for (const key in userInfoPhoto) {
+                    const currentimgData = imgList.list.filter((item) => { return Number(item.key) === Number(key) })
+                    if (currentimgData.length > 0) {
+                        currentimgData[0].url = userInfoPhoto[key]
+                    }
+                }
+                imgList.isPerfect = true
+                imgList.list.forEach(element => {
+                    if (element.url === '') {
+                        imgList.isPerfect = false
+                    }
+                })
+                if (imgList.isPerfect == true && basicInfo.isPerfect == true) {
+                    $('.pdmlink').addClass('cGreen').removeClass('cRed').html('完善')
+                }
+            }
+
+        })
+
+    }
+</script>
